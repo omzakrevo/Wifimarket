@@ -53,13 +53,15 @@ class _BottomBar extends ConsumerWidget {
               AnimatedContainer(
                 duration: Motion.base,
                 curve: Motion.emphasized,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 5),
-                decoration: BoxDecoration(color: on ? cs.primary.withValues(alpha: .14) : Colors.transparent, borderRadius: BorderRadius.circular(99)),
-                child: Badge(
-                  isLabelVisible: badge > 0,
-                  label: Text('$badge'),
-                  child: AnimatedSwitcher(duration: Motion.quick, child: Icon(on ? sel : icon, key: ValueKey(on), color: on ? cs.primary : cs.onSurfaceVariant)),
-                ),
+                width: on ? 6 : 0,
+                height: 6,
+                margin: const EdgeInsets.only(bottom: 3),
+                decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle),
+              ),
+              Badge(
+                isLabelVisible: badge > 0,
+                label: Text('$badge'),
+                child: AnimatedSwitcher(duration: Motion.quick, child: Icon(on ? sel : icon, key: ValueKey(on), color: on ? cs.primary : cs.onSurfaceVariant)),
               ),
               const SizedBox(height: 2),
               Text(label, style: TextStyle(fontSize: 11, fontWeight: on ? FontWeight.w800 : FontWeight.w500, color: on ? cs.primary : cs.onSurfaceVariant)),
@@ -70,7 +72,11 @@ class _BottomBar extends ConsumerWidget {
     }
 
     return Container(
-      decoration: BoxDecoration(color: cs.surface, border: Border(top: BorderSide(color: cs.outlineVariant.withValues(alpha: .6)))),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [BoxShadow(color: WM.signalDeep.withValues(alpha: .10), blurRadius: 30, offset: const Offset(0, -8))],
+      ),
       child: SafeArea(
         top: false,
         child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -85,7 +91,7 @@ class _BottomBar extends ConsumerWidget {
                   Container(
                     width: 52,
                     height: 40,
-                    decoration: BoxDecoration(gradient: WM.signalGradient, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: WM.wave.withValues(alpha: .35), blurRadius: 14, offset: const Offset(0, 6))]),
+                    decoration: BoxDecoration(gradient: WM.signalGradient, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: WM.wave.withValues(alpha: .35), blurRadius: 14, offset: const Offset(0, 6))]),
                     child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
                   ).animate(onPlay: (c) => c.repeat(reverse: true)).scaleXY(begin: 1, end: 1.06, duration: 1600.ms, curve: Curves.easeInOut),
                   const SizedBox(height: 2),

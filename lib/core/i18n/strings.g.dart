@@ -46,6 +46,8 @@ const Map<String, List<String>> kStrings = {
   'footer.zone': ['Afrique de l\'Ouest', 'West Africa'],
   'home.hero_title': ['Le matériel Wi-Fi et réseau, près de chez vous', 'Wi-Fi and networking gear, near you'],
   'home.hero_sub': ['Antennes Ubiquiti, routeurs MikroTik, Starlink, switchs… Achetez, vendez et échangez en toute simplicité.', 'Ubiquiti antennas, MikroTik routers, Starlink, switches… Buy, sell and swap with ease.'],
+  'home.welcome': ['Bon retour', 'Welcome back'],
+  'home.banner_sub': ['Achetez, vendez et échangez en toute simplicité.', 'Buy, sell and swap with ease.'],
   'home.search_placeholder': ['LiteBeam, NanoStation, hAP ac2, Starlink…', 'LiteBeam, NanoStation, hAP ac2, Starlink…'],
   'home.post_wanted': ['Publier une demande', 'Post a request'],
   'home.popular_categories': ['Catégories populaires', 'Popular categories'],

@@ -316,7 +316,7 @@ class StatusChip extends StatelessWidget {
   final int tone;
   @override
   Widget build(BuildContext context) {
-    final c = [Theme.of(context).colorScheme.onSurfaceVariant, WM.signalDeep, const Color(0xFFB77900), WM.coral, WM.wave][tone];
+    final c = [Theme.of(context).colorScheme.onSurfaceVariant, WM.success, const Color(0xFFB77900), WM.coral, WM.wave][tone];
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(color: c.withValues(alpha: .13), borderRadius: BorderRadius.circular(99)),
@@ -385,46 +385,57 @@ class ListingCard extends ConsumerWidget {
     final card = Pressable(
       onTap: () => context.push('/listing/${l.id}', extra: l),
       child: Container(
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: cs.outlineVariant.withValues(alpha: .6)),
+          color: cs.surfaceContainer,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: cs.outlineVariant),
+          boxShadow: WM.softShadow(.06),
         ),
-        clipBehavior: Clip.antiAlias,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           AspectRatio(
-            aspectRatio: 1.15,
-            child: Stack(fit: StackFit.expand, children: [
-              Hero(tag: 'img-${l.id}', child: Net(l.cover)),
-              Positioned(
-                left: 8,
-                top: 8,
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 4, children: [
-                  if (l.isSponsoredNow) Badge2(context.t('listing.sponsored'), color: WM.volt, fg: WM.ink, icon: Icons.bolt_rounded),
-                  Badge2(context.t('cond.${l.condition}')),
-                ]),
-              ),
-              Positioned(right: 6, top: 6, child: HeartButton(active: fav, onTap: () async {
-                if (!requireLogin(context, ref)) return;
-                await guard(context, () async {
-                  await ref.read(favoritesProvider.notifier).toggle(l.id);
-                });
-              })),
-            ]),
+            aspectRatio: 1.12,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Stack(fit: StackFit.expand, children: [
+                Hero(tag: 'img-${l.id}', child: Net(l.cover)),
+                Positioned(
+                  left: 8,
+                  top: 8,
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, spacing: 4, children: [
+                    if (l.isSponsoredNow) Badge2(context.t('listing.sponsored'), color: WM.volt, fg: WM.ink, icon: Icons.bolt_rounded),
+                    Badge2(context.t('cond.${l.condition}')),
+                  ]),
+                ),
+                Positioned(right: 6, top: 6, child: HeartButton(active: fav, onTap: () async {
+                  if (!requireLogin(context, ref)) return;
+                  await guard(context, () async {
+                    await ref.read(favoritesProvider.notifier).toggle(l.id);
+                  });
+                })),
+                Positioned(
+                  left: 8,
+                  bottom: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(gradient: WM.signalGradient, borderRadius: BorderRadius.circular(10)),
+                    child: Text(formatPrice(l.price, l.currency, lang), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13)),
+                  ),
+                ),
+              ]),
+            ),
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+              padding: const EdgeInsets.fromLTRB(6, 10, 6, 4),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(l.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleSmall),
-                const Spacer(),
-                Text(formatPrice(l.price, l.currency, lang), style: Theme.of(context).textTheme.titleMedium?.copyWith(color: cs.primary, fontWeight: FontWeight.w800)),
-                const SizedBox(height: 2),
                 Row(children: [
-                  Icon(Icons.place_outlined, size: 13, color: cs.onSurfaceVariant),
+                  Icon(Icons.place_outlined, size: 13, color: WM.coral),
                   const SizedBox(width: 3),
-                  Expanded(child: Text([l.city, l.country].whereType<String>().join(' · '), maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall)),
+                  Expanded(child: Text([l.city, l.country].whereType<String>().join(' · '), maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: WM.coral, fontWeight: FontWeight.w600))),
                 ]),
+                const SizedBox(height: 4),
+                Text(l.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleSmall),
               ]),
             ),
           ),
