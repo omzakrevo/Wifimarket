@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import '../core/i18n/i18n.dart';
 import '../core/theme/colors.dart';
 import '../core/theme/motion.dart';
+import '../core/utils/format.dart';
 import '../data/providers.dart';
+import 'orders/cart_screens.dart';
 import '../widgets/common.dart';
 import '../widgets/motion.dart';
 
@@ -23,13 +25,49 @@ class AppShell extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final showBottom = !wide && _tabRoots.contains(location);
     return Scaffold(
-      body: Column(children: [
-        if (wide) const _TopBar(),
-        Expanded(child: child),
+      body: Stack(children: [
+        Column(children: [
+          if (wide) const _TopBar(),
+          Expanded(child: child),
+        ]),
+        if (showBottom) const Positioned(left: 16, right: 16, bottom: 12, child: _CartBar()),
       ]),
       bottomNavigationBar: showBottom ? _BottomBar(location: location) : null,
       backgroundColor: cs.surface,
     );
+  }
+}
+
+/// Barre flottante « Voir mon panier » : visible quand le panier n'est pas vide.
+class _CartBar extends ConsumerWidget {
+  const _CartBar();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(uidProvider) == null) return const SizedBox.shrink();
+    final lines = ref.watch(cartProvider).asData?.value ?? const <CartLine>[];
+    if (lines.isEmpty) return const SizedBox.shrink();
+    final count = lines.fold<int>(0, (a, l) => a + l.qty);
+    final currencies = lines.map((l) => l.listing.currency).toSet();
+    final total = currencies.length == 1 ? lines.fold<num>(0, (a, l) => a + l.listing.price * l.qty) : null;
+    return Pressable(
+      onTap: () => context.push('/cart'),
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 22),
+        decoration: BoxDecoration(gradient: WM.signalGradient, borderRadius: BorderRadius.circular(999), boxShadow: WM.softShadow(.35)),
+        child: Row(children: [
+          Text(context.t('cart.view'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
+          const SizedBox(width: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(99)),
+            child: Text('${count}x', style: const TextStyle(color: WM.signalDeep, fontWeight: FontWeight.w800, fontSize: 12)),
+          ),
+          const Spacer(),
+          if (total != null) Text(formatPrice(total, currencies.first, context.lang), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+        ]),
+      ),
+    ).popIn();
   }
 }
 

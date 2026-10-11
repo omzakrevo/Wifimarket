@@ -358,6 +358,7 @@ const Map<String, List<String>> kStrings = {
   'chat.read': ['Lu', 'Read'],
   'chat.sent': ['Envoyé', 'Sent'],
   'chat.blocked_info': ['Vous avez bloqué cet utilisateur.', 'You have blocked this user.'],
+  'cart.view': ['Voir mon panier', 'View your cart'],
   'cart.title': ['Mon panier', 'My cart'],
   'cart.empty': ['Votre panier est vide.', 'Your cart is empty.'],
   'cart.browse': ['Parcourir les annonces', 'Browse listings'],
