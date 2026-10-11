@@ -170,6 +170,8 @@ class _TopBarState extends ConsumerState<_TopBar> {
     final country = ref.watch(countryProvider);
     final dark = Theme.of(context).brightness == Brightness.dark;
     final path = GoRouterState.of(context).uri.path;
+    // En dessous de 1240 px la barre se compacte (liens dans un menu, bouton « Vendre » réduit) pour ne jamais déborder.
+    final compact = MediaQuery.sizeOf(context).width < 1240;
 
     Widget link(String label, String to) {
       final on = to == '/' ? path == '/' : path.startsWith(to);
@@ -209,15 +211,30 @@ class _TopBarState extends ConsumerState<_TopBar> {
                 ),
               ),
               const SizedBox(width: 12),
-              link(context.t('nav.wanted'), '/wanted'),
-              link(context.t('nav.shops'), '/shops'),
-              const Spacer(),
+              if (compact) ...[
+                PopupMenuButton<String>(
+                  tooltip: context.t('nav.shops'),
+                  icon: const Icon(Icons.menu_rounded),
+                  onSelected: (to) => context.go(to),
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: '/wanted', child: Text(context.t('nav.wanted'))),
+                    PopupMenuItem(value: '/shops', child: Text(context.t('nav.shops'))),
+                  ],
+                ),
+                const Spacer(),
+              ] else ...[
+                link(context.t('nav.wanted'), '/wanted'),
+                link(context.t('nav.shops'), '/shops'),
+                const Spacer(),
+              ],
               PopupMenuButton<String?>(
                 tooltip: context.t('loc.title'),
                 icon: Row(mainAxisSize: MainAxisSize.min, children: [
                   const Icon(Icons.place_outlined, size: 20),
-                  const SizedBox(width: 4),
-                  Text(country ?? context.t('common.all'), style: const TextStyle(fontWeight: FontWeight.w700)),
+                  if (!compact) ...[
+                    const SizedBox(width: 4),
+                    Text(country ?? context.t('common.all'), style: const TextStyle(fontWeight: FontWeight.w700)),
+                  ],
                 ]),
                 onSelected: (v) => ref.read(countryProvider.notifier).set(v == '' ? null : v),
                 itemBuilder: (_) => [
@@ -238,7 +255,10 @@ class _TopBarState extends ConsumerState<_TopBar> {
                 IconButton(onPressed: () => context.go('/notifications'), icon: Badge(isLabelVisible: counters.notifications > 0, label: Text('${counters.notifications}'), child: const Icon(Icons.notifications_none_rounded))),
               ],
               const SizedBox(width: 8),
-              GradientButton(label: context.t('nav.sell'), icon: Icons.add_rounded, expand: false, onPressed: () => context.go('/sell')),
+              if (compact)
+                IconButton.filled(tooltip: context.t('nav.sell'), onPressed: () => context.go('/sell'), icon: const Icon(Icons.add_rounded))
+              else
+                GradientButton(label: context.t('nav.sell'), icon: Icons.add_rounded, expand: false, onPressed: () => context.go('/sell')),
               const SizedBox(width: 12),
               if (logged)
                 Pressable(onTap: () => context.go('/account'), child: Avatar(url: profile?.avatarUrl, name: profile?.displayName ?? '?', size: 40))

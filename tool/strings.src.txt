@@ -519,6 +519,17 @@ admin.keywords | Mots interdits | Banned keywords
 admin.keywords_sub | Une annonce contenant l'un de ces mots passe en modération manuelle. | A listing containing any of these words goes to manual review.
 admin.audit | Journal d'audit | Audit log
 admin.audit_sub | Actions administratives et modifications sensibles. | Administrative actions and sensitive changes.
+admin.demo | Données de test | Test data
+admin.demo_sub | Comptes, annonces, boutiques, demandes et commandes de démonstration (e-mails @demo.wifimarket.test). Les données réelles ne sont jamais touchées. | Demo accounts, listings, shops, requests and orders (emails @demo.wifimarket.test). Real data is never touched.
+admin.demo_purge | Supprimer les données de test | Delete test data
+admin.demo_confirm | Supprimer définitivement tous les comptes et contenus de démonstration ? Cette action est irréversible. | Permanently delete all demo accounts and content? This cannot be undone.
+admin.demo_none | Aucune donnée de test à supprimer. | No test data to delete.
+admin.demo_done | Données de test supprimées. | Test data deleted.
+err.demo_account_cannot_purge | Connectez-vous avec votre compte administrateur réel : un compte de démonstration ne peut pas lancer cette suppression. | Sign in with your real admin account: a demo account cannot run this deletion.
+shop.share_link | Lien de la boutique | Shop link
+shop.copy_link | Copier le lien | Copy link
+shop.link_copied | Lien copié | Link copied
+shop.share | Partager la boutique | Share shop
 admin.deletions | Suppressions de données | Data deletions
 admin.deletions_sub | Demandes des utilisateurs (RGPD). | User requests (GDPR).
 admin.open_reports | Signalements ouverts | Open reports

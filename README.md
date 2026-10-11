@@ -47,8 +47,23 @@ Utilisation : `context.t('clé')`.
 
 ## Base de données
 
-`supabase/migrations/0001…0010` + `supabase/seed_demo.sql` (données de démonstration, à supprimer avant le lancement réel).
+`supabase/migrations/0001…0011` + `supabase/seed_demo.sql` (données de démonstration, à supprimer avant le lancement réel).
 La migration `0009_gdpr.sql` (fonction `anonymize_user`) est à exécuter manuellement dans le SQL editor si elle n'est pas appliquée.
+### Devenir administrateur
+
+Créez votre compte sur le site, puis exécutez dans le SQL editor de Supabase (remplacez l'e-mail) :
+
+```sql
+insert into public.user_roles (user_id, role)
+select id, 'superadmin' from auth.users where email = 'vous@exemple.com';
+```
+
+Le menu **Administration** apparaît alors dans l'application.
+
+### Supprimer les données de test
+
+La migration `0011_purge_demo.sql` ajoute le bouton **Administration → Données de test → Supprimer les données de test** (superadmin réel uniquement). Il supprime les comptes `@demo.wifimarket.test` et tout ce qui leur est lié (annonces, boutiques, demandes, conversations, commandes, tarif « DEMO »). Les données réelles ne sont pas touchées ; un compte de démonstration ne peut pas lancer la suppression.
+
 Réglages Supabase Auth à faire : *Site URL* = votre domaine, *Redirect URLs* = `https://votre-domaine/**`.
 
 ## Compilation
