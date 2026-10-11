@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import '../core/i18n/i18n.dart';
 import '../core/theme/colors.dart';
 import '../core/theme/motion.dart';
+import '../core/utils/format.dart';
 import '../data/providers.dart';
+import 'orders/cart_screens.dart';
 import '../widgets/common.dart';
 import '../widgets/motion.dart';
 
@@ -23,13 +25,49 @@ class AppShell extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final showBottom = !wide && _tabRoots.contains(location);
     return Scaffold(
-      body: Column(children: [
-        if (wide) const _TopBar(),
-        Expanded(child: child),
+      body: Stack(children: [
+        Column(children: [
+          if (wide) const _TopBar(),
+          Expanded(child: child),
+        ]),
+        if (showBottom) const Positioned(left: 16, right: 16, bottom: 12, child: _CartBar()),
       ]),
       bottomNavigationBar: showBottom ? _BottomBar(location: location) : null,
       backgroundColor: cs.surface,
     );
+  }
+}
+
+/// Barre flottante « Voir mon panier » : visible quand le panier n'est pas vide.
+class _CartBar extends ConsumerWidget {
+  const _CartBar();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(uidProvider) == null) return const SizedBox.shrink();
+    final lines = ref.watch(cartProvider).asData?.value ?? const <CartLine>[];
+    if (lines.isEmpty) return const SizedBox.shrink();
+    final count = lines.fold<int>(0, (a, l) => a + l.qty);
+    final currencies = lines.map((l) => l.listing.currency).toSet();
+    final total = currencies.length == 1 ? lines.fold<num>(0, (a, l) => a + l.listing.price * l.qty) : null;
+    return Pressable(
+      onTap: () => context.push('/cart'),
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 22),
+        decoration: BoxDecoration(gradient: WM.signalGradient, borderRadius: BorderRadius.circular(999), boxShadow: WM.softShadow(.35)),
+        child: Row(children: [
+          Text(context.t('cart.view'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
+          const SizedBox(width: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(99)),
+            child: Text('${count}x', style: const TextStyle(color: WM.signalDeep, fontWeight: FontWeight.w800, fontSize: 12)),
+          ),
+          const Spacer(),
+          if (total != null) Text(formatPrice(total, currencies.first, context.lang), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+        ]),
+      ),
+    ).popIn();
   }
 }
 
@@ -53,13 +91,15 @@ class _BottomBar extends ConsumerWidget {
               AnimatedContainer(
                 duration: Motion.base,
                 curve: Motion.emphasized,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 5),
-                decoration: BoxDecoration(color: on ? cs.primary.withValues(alpha: .14) : Colors.transparent, borderRadius: BorderRadius.circular(99)),
-                child: Badge(
-                  isLabelVisible: badge > 0,
-                  label: Text('$badge'),
-                  child: AnimatedSwitcher(duration: Motion.quick, child: Icon(on ? sel : icon, key: ValueKey(on), color: on ? cs.primary : cs.onSurfaceVariant)),
-                ),
+                width: on ? 6 : 0,
+                height: 6,
+                margin: const EdgeInsets.only(bottom: 3),
+                decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle),
+              ),
+              Badge(
+                isLabelVisible: badge > 0,
+                label: Text('$badge'),
+                child: AnimatedSwitcher(duration: Motion.quick, child: Icon(on ? sel : icon, key: ValueKey(on), color: on ? cs.primary : cs.onSurfaceVariant)),
               ),
               const SizedBox(height: 2),
               Text(label, style: TextStyle(fontSize: 11, fontWeight: on ? FontWeight.w800 : FontWeight.w500, color: on ? cs.primary : cs.onSurfaceVariant)),
@@ -70,7 +110,11 @@ class _BottomBar extends ConsumerWidget {
     }
 
     return Container(
-      decoration: BoxDecoration(color: cs.surface, border: Border(top: BorderSide(color: cs.outlineVariant.withValues(alpha: .6)))),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [BoxShadow(color: WM.signalDeep.withValues(alpha: .10), blurRadius: 30, offset: const Offset(0, -8))],
+      ),
       child: SafeArea(
         top: false,
         child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -85,7 +129,7 @@ class _BottomBar extends ConsumerWidget {
                   Container(
                     width: 52,
                     height: 40,
-                    decoration: BoxDecoration(gradient: WM.signalGradient, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: WM.wave.withValues(alpha: .35), blurRadius: 14, offset: const Offset(0, 6))]),
+                    decoration: BoxDecoration(gradient: WM.signalGradient, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: WM.wave.withValues(alpha: .35), blurRadius: 14, offset: const Offset(0, 6))]),
                     child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
                   ).animate(onPlay: (c) => c.repeat(reverse: true)).scaleXY(begin: 1, end: 1.06, duration: 1600.ms, curve: Curves.easeInOut),
                   const SizedBox(height: 2),

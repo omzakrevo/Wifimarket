@@ -138,7 +138,7 @@ class SellerScreen extends ConsumerWidget {
                 Container(
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerLow, borderRadius: BorderRadius.circular(16)),
+                  decoration: softCard(Theme.of(context).colorScheme),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Row(children: [
                       Text(((r['profiles'] as Map?)?['display_name'] as String?) ?? '', style: Theme.of(context).textTheme.titleSmall),
@@ -268,7 +268,7 @@ class _ManageShop extends ConsumerWidget {
           child: Container(
             margin: const EdgeInsets.only(right: 8, bottom: 8),
             padding: const EdgeInsets.symmetric(vertical: 14),
-            decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(16)),
+            decoration: softCard(cs),
             child: Column(children: [
               v is num ? AnimatedCount(value: v, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: cs.primary, fontWeight: FontWeight.w800)) : Text('${v ?? '—'}', style: Theme.of(context).textTheme.titleLarge),
               Text(label, style: Theme.of(context).textTheme.bodySmall, textAlign: TextAlign.center),
@@ -322,7 +322,7 @@ class _ManageShop extends ConsumerWidget {
               for (final p in plans)
                 Container(
                   margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(16)),
+                  decoration: softCard(cs),
                   child: ListTile(
                     title: Text(p['name'] as String),
                     subtitle: Text('${formatPrice(p['price'] as num, p['currency_code'] as String, context.lang)} / ${p['duration_days']} ${context.t('common.days')}'),

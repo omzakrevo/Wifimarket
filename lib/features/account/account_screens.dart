@@ -33,7 +33,7 @@ class AccountScreen extends ConsumerWidget {
           child: Container(
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(18)),
+            decoration: softCard(cs),
             child: Row(children: [
               Container(width: 38, height: 38, decoration: BoxDecoration(color: cs.primary.withValues(alpha: .12), borderRadius: BorderRadius.circular(12)), child: Icon(i, color: cs.primary, size: 20)),
               const SizedBox(width: 14),
@@ -61,7 +61,7 @@ class AccountScreen extends ConsumerWidget {
                   Text(context.t('account.hello', {'name': p?.displayName ?? ''}), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 4),
                   Row(children: [
-                    Icon(p?.verified == true ? Icons.verified_rounded : Icons.shield_outlined, size: 16, color: p?.verified == true ? WM.signal : Colors.white60),
+                    Icon(p?.verified == true ? Icons.verified_rounded : Icons.shield_outlined, size: 16, color: p?.verified == true ? WM.volt : Colors.white60),
                     const SizedBox(width: 4),
                     Text(p?.verified == true ? context.t('profile.verified') : context.t('profile.unverified'), style: const TextStyle(color: Colors.white70, fontSize: 13)),
                   ]),
@@ -81,7 +81,7 @@ class AccountScreen extends ConsumerWidget {
               child: Container(
                 margin: EdgeInsets.only(right: i == 2 ? 0 : 10),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(18)),
+                decoration: softCard(cs),
                 child: Column(children: [AnimatedCount(value: s.$1, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: cs.primary, fontWeight: FontWeight.w800)), Text(s.$2, style: Theme.of(context).textTheme.bodySmall)]),
               ).reveal(index: i + 1),
             ),
@@ -100,7 +100,7 @@ class AccountScreen extends ConsumerWidget {
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(18)),
+          decoration: softCard(cs),
           child: Column(children: [
             SwitchListTile(title: Text(context.t('common.theme')), secondary: Icon(dark ? Icons.dark_mode_rounded : Icons.light_mode_rounded), value: dark, onChanged: (v) => ref.read(themeProvider.notifier).set(v)),
             ListTile(
@@ -289,7 +289,7 @@ class MyListingsScreen extends ConsumerWidget {
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(18)),
+                      decoration: softCard(cs),
                       child: Row(children: [
                         SizedBox(width: 72, height: 72, child: Net(l.cover, radius: 14)),
                         const SizedBox(width: 12),
@@ -356,7 +356,7 @@ class _SavedState extends ConsumerState<SavedSearchesScreen> {
             for (final (i, r) in rows.indexed)
               Container(
                 margin: const EdgeInsets.only(bottom: 10),
-                decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerLow, borderRadius: BorderRadius.circular(18)),
+                decoration: softCard(Theme.of(context).colorScheme),
                 child: ListTile(
                   leading: const Icon(Icons.search_rounded),
                   title: Text((r['label'] as String?) ?? (r['query'] as String?) ?? '—'),
@@ -420,7 +420,7 @@ class _NotifState extends ConsumerState<NotificationsScreen> {
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: n['read_at'] == null ? WM.signal.withValues(alpha: .1) : Theme.of(context).colorScheme.surfaceContainerLow,
+                    color: n['read_at'] == null ? WM.signal.withValues(alpha: .1) : Theme.of(context).colorScheme.surfaceContainer,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(children: [

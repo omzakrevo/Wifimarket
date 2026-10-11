@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Identité « Signal » : un teal électrique qui glisse vers un bleu profond (la vague Wi-Fi),
-/// une encre bleu nuit pour les fonds sombres et un ambre « volt » réservé aux promotions.
+/// Identité « Signal » : un bleu royal lumineux (la vague Wi-Fi) sur des fonds clairs bleutés,
+/// des cartes blanches très arrondies, une encre bleu nuit pour le mode sombre et un jaune « volt » pour les appels à l'action.
 class WM {
   WM._();
 
@@ -9,26 +9,32 @@ class WM {
   static const midnight = Color(0xFF0F1B33);
   static const night = Color(0xFF16254A);
 
-  static const signal = Color(0xFF00C2A8);
-  static const signalDeep = Color(0xFF0A7F73);
-  static const wave = Color(0xFF2F6BFF);
-  static const volt = Color(0xFFFFB300);
-  static const coral = Color(0xFFFF5D5D);
-  static const mint = Color(0xFFD9FBF4);
+  static const signal = Color(0xFF4F86FF);
+  static const signalDeep = Color(0xFF2456E5);
+  static const wave = Color(0xFF1E48D6);
+  static const volt = Color(0xFFFFD43B);
+  static const coral = Color(0xFFE5484D);
+  static const mint = Color(0xFFE4ECFF);
+  static const success = Color(0xFF12915B);
 
-  static const paper = Color(0xFFF4F7FB);
-  static const line = Color(0xFFE2E8F2);
-  static const slate = Color(0xFF5B6B84);
+  static const paper = Color(0xFFEEF3FF);
+  static const line = Color(0xFFDDE5F5);
+  static const slate = Color(0xFF5F6F8C);
 
   static const signalGradient = LinearGradient(
-    colors: [signal, wave],
+    colors: [signal, signalDeep, wave],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
+  /// Ombre douce des cartes blanches.
+  static List<BoxShadow> softShadow([double alpha = .08]) => [
+        BoxShadow(color: const Color(0xFF2456E5).withValues(alpha: alpha), blurRadius: 24, offset: const Offset(0, 10)),
+      ];
+
   static const nightGradient = LinearGradient(
-    colors: [ink, night],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
+    colors: [signal, signalDeep, wave],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
   );
 }

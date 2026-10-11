@@ -208,7 +208,7 @@ class LogoWordmark extends StatelessWidget {
       const SizedBox(width: 10),
       Text.rich(TextSpan(children: [
         TextSpan(text: 'WiFi', style: style),
-        TextSpan(text: 'Market', style: style?.copyWith(color: light ? WM.signal : Theme.of(context).colorScheme.primary)),
+        TextSpan(text: 'Market', style: style?.copyWith(color: light ? WM.volt : Theme.of(context).colorScheme.primary)),
       ])),
     ]);
   }
@@ -216,7 +216,7 @@ class LogoWordmark extends StatelessWidget {
 
 /// Anneaux de signal qui se propagent depuis un point : l'élément visuel signature du site.
 class WifiRings extends StatefulWidget {
-  const WifiRings({super.key, this.color = WM.signal, this.rings = 4, this.alignment = Alignment.bottomRight});
+  const WifiRings({super.key, this.color = Colors.white, this.rings = 4, this.alignment = Alignment.bottomRight});
   final Color color;
   final int rings;
   final Alignment alignment;

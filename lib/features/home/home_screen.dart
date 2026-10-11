@@ -114,6 +114,7 @@ class _Hero extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final wide = isWide(context);
     final top = MediaQuery.paddingOf(context).top;
+    if (!wide) return _MobileHero(ctl: ctl, onSubmit: onSubmit, top: top);
     return AnimatedBuilder(
       animation: scroll,
       builder: (context, _) {
@@ -121,13 +122,14 @@ class _Hero extends ConsumerWidget {
         return ClipRect(
           child: Container(
             width: double.infinity,
-            decoration: const BoxDecoration(gradient: WM.nightGradient),
+            decoration: const BoxDecoration(gradient: WM.signalGradient),
             child: Stack(
               children: [
                 Positioned.fill(
                   child: Transform.translate(
                     offset: Offset(0, off * .25),
                     child: const WifiRings(
+                      color: Colors.white,
                       rings: 5,
                       alignment: Alignment.topRight,
                     ),
@@ -165,8 +167,6 @@ class _Hero extends ConsumerWidget {
                             ? CrossAxisAlignment.center
                             : CrossAxisAlignment.start,
                         children: [
-                          if (!wide) const _MobileTop(),
-                          SizedBox(height: wide ? 0 : 22),
                           Text(
                                 context.t('home.hero_title'),
                                 textAlign: wide
@@ -317,78 +317,163 @@ class _Hero extends ConsumerWidget {
   }
 }
 
-class _MobileTop extends ConsumerWidget {
-  const _MobileTop();
+/// En-tête mobile : accueil, recherche en pilule, puces de catégories et bannière promotionnelle.
+class _MobileHero extends ConsumerWidget {
+  const _MobileHero({required this.ctl, required this.onSubmit, required this.top});
+  final TextEditingController ctl;
+  final ValueChanged<String> onSubmit;
+  final double top;
+
+  Widget _round(BuildContext context, IconData icon, VoidCallback onTap, {Widget? badge}) {
+    final cs = Theme.of(context).colorScheme;
+    return Pressable(
+      onTap: onTap,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(color: cs.surfaceContainer, shape: BoxShape.circle, boxShadow: WM.softShadow(.08)),
+        child: badge ?? Icon(icon, color: cs.onSurface),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final country = ref.watch(countryProvider);
-    final countries = ref.watch(countriesProvider).asData?.value ?? [];
+    final cs = Theme.of(context).colorScheme;
+    final lang = context.lang;
     final logged = ref.watch(uidProvider) != null;
     final unread = ref.watch(countersProvider).notifications;
-    return Row(
-      children: [
-        const LogoWordmark(light: true, size: 30),
-        const Spacer(),
-        PopupMenuButton<String>(
-          tooltip: context.t('loc.title'),
-          onSelected: (v) =>
-              ref.read(countryProvider.notifier).set(v == '' ? null : v),
-          itemBuilder: (_) => [
-            PopupMenuItem(value: '', child: Text(context.t('loc.all'))),
-            for (final c in countries)
-              PopupMenuItem(value: c.code, child: Text(c.name(context.lang))),
-          ],
+    final profile = ref.watch(myProfileProvider).asData?.value;
+    final country = ref.watch(countryProvider);
+    final countries = ref.watch(countriesProvider).asData?.value ?? [];
+    final cats = ref.watch(categoriesProvider).asData?.value.where((c) => c.parentId == null).toList() ?? [];
+
+    Widget chip(String label, {IconData? icon, bool on = false, VoidCallback? onTap}) => Pressable(
+          onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.white12,
-              borderRadius: BorderRadius.circular(99),
+              color: on ? cs.primary : cs.surfaceContainer,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: on ? cs.primary : cs.outline),
+              boxShadow: on ? WM.softShadow(.25) : null,
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.place_outlined, size: 16, color: Colors.white),
-                const SizedBox(width: 4),
-                Text(
-                  country ?? context.t('common.all'),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              if (icon != null) ...[Icon(icon, size: 18, color: on ? cs.onPrimary : cs.onSurface), const SizedBox(width: 6)],
+              Text(label, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: on ? cs.onPrimary : cs.onSurface)),
+            ]),
+          ),
+        );
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, top + 14, 0, 6),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: Row(children: [
+            if (logged) ...[Avatar(url: profile?.avatarUrl, name: profile?.displayName ?? '?', size: 48), const SizedBox(width: 12)] else ...[const LogoMark(size: 44), const SizedBox(width: 12)],
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(context.t('home.welcome'), style: Theme.of(context).textTheme.bodySmall),
+                Text(profile?.displayName ?? 'WiFiMarket', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium),
+              ]),
+            ),
+            PopupMenuButton<String>(
+              tooltip: context.t('loc.title'),
+              onSelected: (v) => ref.read(countryProvider.notifier).set(v == '' ? null : v),
+              itemBuilder: (_) => [
+                PopupMenuItem(value: '', child: Text(context.t('loc.all'))),
+                for (final c in countries) PopupMenuItem(value: c.code, child: Text(c.name(lang))),
+              ],
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(99), boxShadow: WM.softShadow(.08)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.place_outlined, size: 16, color: cs.primary),
+                  const SizedBox(width: 4),
+                  Text(country ?? context.t('common.all'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                ]),
+              ),
+            ),
+            const SizedBox(width: 8),
+            _round(context, Icons.language_rounded, () => ref.read(langProvider.notifier).toggle(),
+                badge: Center(child: Text(lang == 'fr' ? 'EN' : 'FR', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)))),
+            if (logged) ...[
+              const SizedBox(width: 8),
+              _round(context, Icons.notifications_none_rounded, () => context.push('/notifications'),
+                  badge: Badge(isLabelVisible: unread > 0, label: Text('$unread'), child: Icon(Icons.notifications_none_rounded, color: cs.onSurface))),
+            ],
+          ]),
+        ).reveal(),
+        const SizedBox(height: 18),
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: Row(children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(999), boxShadow: WM.softShadow(.06)),
+                child: TextField(
+                  controller: ctl,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: onSubmit,
+                  decoration: InputDecoration(
+                    hintText: context.t('home.search_placeholder'),
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    filled: false,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-        InkWell(
-          borderRadius: BorderRadius.circular(99),
-          onTap: () => ref.read(langProvider.notifier).toggle(),
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(
-              context.lang == 'fr' ? 'EN' : 'FR',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
               ),
             ),
-          ),
-        ),
-        if (logged)
-          IconButton(
-            onPressed: () => context.push('/notifications'),
-            icon: Badge(
-              isLabelVisible: unread > 0,
-              label: Text('$unread'),
-              child: const Icon(
-                Icons.notifications_none_rounded,
-                color: Colors.white,
+            const SizedBox(width: 10),
+            _round(context, Icons.tune_rounded, () => context.go('/search')),
+          ]),
+        ).reveal(index: 1),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 44,
+          child: ListView(scrollDirection: Axis.horizontal, clipBehavior: Clip.none, children: [
+            chip(context.t('common.all'), icon: Icons.apps_rounded, on: true, onTap: () => context.go('/search')),
+            for (final c in cats) ...[const SizedBox(width: 8), chip(c.name(lang), icon: categoryIcon(c.icon), onTap: () => context.push('/category/${c.slug}'))],
+            const SizedBox(width: 16),
+          ]),
+        ).reveal(index: 2),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: Container(
+            width: double.infinity,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(gradient: WM.signalGradient, borderRadius: BorderRadius.circular(24), boxShadow: WM.softShadow(.3)),
+            child: Stack(children: [
+              const Positioned.fill(child: WifiRings(color: Colors.white, rings: 4, alignment: Alignment.centerRight)),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(context.t('home.hero_title'), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1.15)),
+                  const SizedBox(height: 6),
+                  Text(context.t('home.banner_sub'), style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                  const SizedBox(height: 14),
+                  Pressable(
+                    onTap: () => context.push('/sell'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(color: WM.volt, borderRadius: BorderRadius.circular(14)),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        const Icon(Icons.add_rounded, size: 18, color: WM.ink),
+                        const SizedBox(width: 6),
+                        Text(context.t('nav.sell'), style: const TextStyle(color: WM.ink, fontWeight: FontWeight.w800)),
+                      ]),
+                    ),
+                  ),
+                ]),
               ),
-            ),
+            ]),
           ),
-      ],
+        ).reveal(index: 3),
+      ]),
     );
   }
 }
@@ -431,7 +516,7 @@ class _Categories extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: cs.surfaceContainerLow,
+                          color: cs.surfaceContainer,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: cs.outlineVariant.withValues(alpha: .6),
@@ -650,7 +735,7 @@ class ShopTile extends StatelessWidget {
         width: 190,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: cs.surfaceContainerLow,
+          color: cs.surfaceContainer,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: cs.outlineVariant.withValues(alpha: .6)),
         ),
@@ -702,7 +787,7 @@ class _Footer extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
