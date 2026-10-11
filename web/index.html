@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="WiFiMarket : achetez et vendez du matériel Wi-Fi et réseau (antennes, routeurs, hotspots, câblage) en Afrique de l'Ouest. Annonces, boutiques vérifiées, messagerie et livraison.">
+  <meta name="theme-color" content="#0A1220">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="WiFiMarket — Le marché du matériel Wi-Fi en Afrique de l'Ouest">
+  <meta property="og:description" content="Antennes, routeurs, hotspots, câblage : annonces, boutiques vérifiées et messagerie intégrée.">
+  <meta property="og:site_name" content="WiFiMarket">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WiFiMarket">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
+  <title>WiFiMarket — Matériel Wi-Fi et réseau</title>
+  <style>
+    html,body{margin:0;height:100%;background:#0A1220}
+    #splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(#0A1220,#16254A);color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;transition:opacity .5s ease;z-index:9}
+    #splash.done{opacity:0;pointer-events:none}
+    .rings{position:relative;width:96px;height:96px}
+    .rings i{position:absolute;left:50%;bottom:18px;border:5px solid transparent;border-top-color:#00C2A8;border-radius:50%;transform:translateX(-50%);opacity:0;animation:pulse 1.4s infinite}
+    .rings i:nth-child(1){width:30px;height:30px;margin-left:0}
+    .rings i:nth-child(2){width:56px;height:56px;animation-delay:.18s;border-top-color:#1AA6D9}
+    .rings i:nth-child(3){width:82px;height:82px;animation-delay:.36s;border-top-color:#2F6BFF}
+    .rings b{position:absolute;left:50%;bottom:10px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#fff}
+    @keyframes pulse{0%{opacity:0;transform:translateX(-50%) scale(.85)}40%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(1.05)}}
+    #splash p{margin:18px 0 0;font-weight:800;font-size:22px;letter-spacing:-.3px}
+    #splash p span{color:#00C2A8}
+  </style>
+</head>
+<body>
+  <div id="splash"><div class="rings"><i></i><i></i><i></i><b></b></div><p>WiFi<span>Market</span></p></div>
+  <noscript>WiFiMarket nécessite JavaScript pour fonctionner. / WiFiMarket requires JavaScript.</noscript>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var s = document.getElementById('splash');
+      if (s) { s.classList.add('done'); setTimeout(function () { s.remove(); }, 600); }
+    });
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

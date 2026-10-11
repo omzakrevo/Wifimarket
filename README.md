@@ -1,64 +1,74 @@
-# WiFiMarket
+# WiFiMarket — application Flutter (web + Android + iOS)
 
-Marketplace ouverte et multivendeurs du matériel Wi-Fi, radio, Starlink et réseau en Afrique de l'Ouest (neuf, occasion, reconditionné, pièces, échanges, demandes, boutiques, commandes).
-Domaine : https://wifimarket.tech · Français / English · PWA installable.
+Marketplace du matériel Wi-Fi et réseau en Afrique de l'Ouest (FR/EN). Une seule base de code Flutter produit
+le **site web** (statique) et les **applications mobiles**. Le backend est le projet Supabase **wifimarket**
+(Postgres + RLS, Auth, Storage, Realtime).
 
-**Stack** : Next.js 16 (App Router, TypeScript) · React 19 · Tailwind CSS 4 · Supabase (PostgreSQL + RLS, Auth, Storage, Realtime) · Netlify.
+> L'ancienne version Next.js est conservée sur la branche `legacy-nextjs`.
 
-## Démarrage rapide
+## Fonctionnalités
+
+Comptes (e-mail / mot de passe, Google et SMS activables) · accueil animé · recherche avancée (RPC `search_listings`,
+filtres, tri, alertes de recherche) · fiches annonces (galerie, zoom, partage, WhatsApp avec consentement) ·
+publication / édition avec photos (caméra ou galerie) et vidéo · favoris · messagerie temps réel (images, accusés de lecture,
+blocage, signalement) · demandes de matériel + offres · négociations et échanges · boutiques et profils vendeurs ·
+panier, commande (retrait / local / inter-villes / international — **frais issus uniquement des règles configurées**) ·
+suivi de commande, litiges, avis · notifications · administration complète (modération, utilisateurs, boutiques,
+commandes, litiges, promotions, catalogue, pays, réglages, plans, livraison, prestataires, mots interdits, audit, suppressions RGPD) ·
+mode sombre · FR/EN · design « Signal » avec motion design (cascades d'apparition, rebond tactile, anneaux Wi-Fi animés, cœur animé, compteurs, transitions de pages).
+
+Paiements en ligne : **désactivés** (aucun prestataire n'est activé ; seul « paiement convenu entre les parties » est actif).
+
+## Démarrer
 
 ```bash
-npm install
-cp .env.example .env.local        # renseigner NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY
-npm run dev                       # http://localhost:3000
+flutter pub get
+flutter run -d chrome            # web
+flutter run                      # appareil / émulateur Android ou iOS
+flutter test                     # tests unitaires
+flutter analyze
 ```
 
-Sans variables Supabase, le site s'affiche avec un bandeau « Configuration requise » (aucun crash).
+Configuration (valeurs par défaut = projet Supabase `wifimarket`, clé **publique** uniquement) :
 
-### Base de données Supabase
+```bash
+flutter run --dart-define=SUPABASE_URL=https://xxxx.supabase.co \
+            --dart-define=SUPABASE_ANON_KEY=sb_publishable_... \
+            --dart-define=SITE_URL=https://wifimarket.tech \
+            --dart-define=AUTH_GOOGLE=true --dart-define=AUTH_PHONE=true   # si activés dans Supabase Auth
+```
 
-1. Créer (ou choisir) un projet Supabase.
-2. Appliquer **dans l'ordre** les fichiers de `supabase/migrations/` (SQL Editor, ou `supabase db push` avec la CLI) :
-   `0001_schema` → `0002_logic` → `0003_rls` → `0004_storage` → `0005_reference_data` → `0006_search` → `0007_realtime` → `0008_verification` → `0009_gdpr` → `0010_fix_function_search_path`.
-3. *(Développement / démo uniquement)* `supabase/seed_demo.sql` : 8 vendeurs, 3 boutiques, 30 annonces, demandes, conversations, commandes de test (e-mails `*@demo.wifimarket.test`, mot de passe `Demo!2345`, données marquées `is_demo`). **Ne jamais l'exécuter en production.**
-4. Auth → URL Configuration : *Site URL* = `https://wifimarket.tech`, *Redirect URLs* = `https://wifimarket.tech/auth/callback`, `http://localhost:3000/auth/callback`.
-5. Créer le premier superadministrateur (après inscription via le site) :
-   ```sql
-   insert into public.user_roles (user_id, role)
-   select id, 'superadmin' from auth.users where email = 'vous@exemple.com';
-   ```
-6. Annonces expirées : planifier `select public.expire_listings();` (pg_cron ou fonction planifiée) — par exemple chaque heure.
-7. Connexions optionnelles : Google (Auth → Providers) puis `NEXT_PUBLIC_AUTH_GOOGLE_ENABLED=true` ; téléphone/OTP (fournisseur SMS requis) puis `NEXT_PUBLIC_AUTH_PHONE_ENABLED=true`.
+La clé `service_role` ne doit **jamais** figurer dans l'application.
 
-## Tests
+## Textes (i18n)
 
-| Commande | Contenu |
+`tool/strings.src.txt` (clé | français | anglais) → `python3 tool/build_strings.py` → `lib/core/i18n/strings.g.dart`.
+Utilisation : `context.t('clé')`.
+
+## Base de données
+
+`supabase/migrations/0001…0010` + `supabase/seed_demo.sql` (données de démonstration, à supprimer avant le lancement réel).
+La migration `0009_gdpr.sql` (fonction `anonymize_user`) est à exécuter manuellement dans le SQL editor si elle n'est pas appliquée.
+Réglages Supabase Auth à faire : *Site URL* = votre domaine, *Redirect URLs* = `https://votre-domaine/**`.
+
+## Compilation
+
+| Cible | Commande |
 |---|---|
-| `npm run test:sql` | PostgreSQL jetable : applique migrations + démo, 100+ vérifications RLS / logique métier / recherche / RGPD |
-| `npm test` | Tests unitaires (formats, i18n, anti open-redirect, signature de webhook Paystack) |
-| `npm run build && npm run test:e2e` | Playwright mobile + desktop : pages publiques, responsive, PWA, SEO, en-têtes, redirections |
-| `E2E_SUPABASE=1 npm run test:e2e` | Parcours complets (inscription, recherche, favoris, messagerie, publication, commande, admin) sur un vrai projet Supabase avec la démo |
-| `npm run typecheck` · `npm run lint` · `npm run check:i18n` | Types, ESLint, clés de traduction |
+| Web (statique) | `bash tool/build_web.sh` → `build/web` |
+| Android | `flutter build apk --release` / `flutter build appbundle` |
+| iOS | `flutter build ipa` (macOS + Xcode requis) |
 
-## Architecture
+Hébergement : voir [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md) (Netlify, LWS / Apache, DNS).
 
-- `supabase/migrations` — schéma (35+ tables), RLS, fonctions métier SECURITY DEFINER (modération, commandes, négociations…), Storage, recherche plein texte.
-- `src/app` — pages (App Router) et `actions/` (Server Actions validées par Zod ; droits **toujours** contrôlés par la RLS / fonctions SQL).
-- `src/app/api/payments/paystack` — initialisation et webhook authentifié (signature HMAC + revérification API + idempotence).
-- `src/lib/i18n` + `scripts/messages.src.txt` — traductions FR/EN (`npm run build:messages` régénère `messages.ts`).
-- `public/sw.js` — service worker (cache statique, page hors connexion ; jamais de cache des pages connectées).
+## Structure
 
-### Principes de sécurité
-- Clé `service_role` jamais exposée au navigateur (`server-only`, variable sans préfixe `NEXT_PUBLIC`).
-- RLS activée sur toutes les tables ; données privées (`private_profiles`), commandes, paiements et messages limités à leurs participants.
-- WhatsApp : numéro jamais lisible directement, exposé seulement via `get_whatsapp()` si le vendeur a consenti.
-- Prix stockés avec leur devise d'origine, **aucune conversion automatique** ; frais de livraison issus uniquement de règles configurées (`shipping_rules`).
-- Photos ré-encodées côté navigateur (EXIF/géolocalisation supprimés) ; buckets avec limites de taille et types MIME.
-- Modération : mots interdits, file de revue, signalements, limites anti-spam, journal d'audit des actions sensibles.
-
-## Paiements
-Aucun paiement réel n'est simulé. Au départ, seul « paiement convenu entre les parties » (hors plateforme) est actif.
-Paystack est intégré (initialisation + webhook vérifié) mais **inactif** tant qu'un administrateur n'a pas, dans *Admin → Paramètres → Prestataires*, activé le prestataire **et** confirmé pays/devises/moyens avec Paystack, et que `PAYSTACK_SECRET_KEY` (clé `sk_test_…` = sandbox) est définie. CinetPay : table et interface prêtes, adaptateur serveur **non écrit** (à faire dès réception de la documentation/identifiants marchands). Les versements aux vendeurs et la conservation des fonds dépendent des capacités contractuelles du prestataire : non implémentés.
-
-## Déploiement
-Voir [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md) (GitHub → Netlify → domaine wifimarket.tech chez LWS, HTTPS, redirections).
+```
+lib/
+  core/      config, i18n, thème, utilitaires
+  data/      modèles, repository Supabase, providers Riverpod
+  widgets/   composants communs et animations
+  features/  home, search, listing, auth, account, chat, wanted, nego, shops, orders, admin, info
+  router.dart, app.dart, main.dart
+supabase/    migrations SQL, données de démonstration, tests SQL
+```
