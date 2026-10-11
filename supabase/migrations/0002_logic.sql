@@ -599,6 +599,16 @@ begin
   on conflict (user_id, listing_id) do update set quantity = excluded.quantity;
 end $$;
 
+-- Vide les lignes du panier d'un groupe (vendeur, devise) une fois la commande créée
+create or replace function public.cart_clear_group(p_user uuid, p_seller uuid, p_currency text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  delete from public.cart_items
+   where user_id = p_user
+     and listing_id in (select id from public.listings where seller_id = p_seller and currency_code = p_currency);
+end $$;
+revoke execute on function public.cart_clear_group(uuid, uuid, text) from public, anon, authenticated;
+
 create or replace function public.place_order(p_delivery_method text, p_address jsonb default null,
                                               p_payment_method text default null, p_note text default null)
 returns setof uuid language plpgsql security definer set search_path = public as $$
@@ -679,8 +689,7 @@ begin
     insert into public.notifications (user_id, type, title, body, link)
     values (g.seller_id, 'order', 'Nouvelle commande', 'Une commande attend votre confirmation.', '/compte/commandes');
 
-    delete from public.cart_items ci using public.listings l
-     where ci.user_id = v_me and ci.listing_id = l.id and l.seller_id = g.seller_id and l.currency_code = g.currency_code;
+    perform public.cart_clear_group(v_me, g.seller_id, g.currency_code);
 
     return next v_order;
   end loop;

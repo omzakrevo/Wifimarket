@@ -254,7 +254,7 @@ create policy deletion_read on public.data_deletion_requests for select using (u
 create policy deletion_update on public.data_deletion_requests for update using (public.is_admin()) with check (public.is_admin());
 
 -- ---------------------------------------------------------------- Droits d'exécution des fonctions
-revoke execute on all functions in schema public from public, anon;
+revoke execute on all functions in schema public from public, anon, authenticated;
 grant execute on function public.has_role(text, text), public.is_superadmin(), public.is_staff(), public.is_admin(),
   public.can_moderate(text), public.is_shop_member(uuid), public.is_conversation_member(uuid), public.are_blocked(uuid, uuid),
   public.increment_listing_views(uuid), public.slugify(text), public.immutable_unaccent(text),

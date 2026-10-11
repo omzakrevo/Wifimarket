@@ -19,7 +19,7 @@ Sans variables Supabase, le site s'affiche avec un bandeau « Configuration requ
 
 1. Créer (ou choisir) un projet Supabase.
 2. Appliquer **dans l'ordre** les fichiers de `supabase/migrations/` (SQL Editor, ou `supabase db push` avec la CLI) :
-   `0001_schema` → `0002_logic` → `0003_rls` → `0004_storage` → `0005_reference_data` → `0006_search` → `0007_realtime` → `0008_verification` → `0009_gdpr`.
+   `0001_schema` → `0002_logic` → `0003_rls` → `0004_storage` → `0005_reference_data` → `0006_search` → `0007_realtime` → `0008_verification` → `0009_gdpr` → `0010_fix_function_search_path`.
 3. *(Développement / démo uniquement)* `supabase/seed_demo.sql` : 8 vendeurs, 3 boutiques, 30 annonces, demandes, conversations, commandes de test (e-mails `*@demo.wifimarket.test`, mot de passe `Demo!2345`, données marquées `is_demo`). **Ne jamais l'exécuter en production.**
 4. Auth → URL Configuration : *Site URL* = `https://wifimarket.tech`, *Redirect URLs* = `https://wifimarket.tech/auth/callback`, `http://localhost:3000/auth/callback`.
 5. Créer le premier superadministrateur (après inscription via le site) :
