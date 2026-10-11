@@ -216,15 +216,28 @@ class _DashState extends State<_Dashboard> {
           if (!s.hasData) return const SkeletonList();
           final d = s.data!;
           final cs = Theme.of(context).colorScheme;
-          Widget card(String label, num v, {Color? color, String? to}) => Pressable(
-                onTap: to == null ? null : () => context.go(to),
-                child: Container(
-                  width: 170,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(18), border: Border.all(color: (color ?? cs.outlineVariant).withValues(alpha: .5))),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [AnimatedCount(value: v, style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: color ?? cs.primary, fontWeight: FontWeight.w800)), Text(label, style: Theme.of(context).textTheme.bodySmall)]),
-                ),
-              );
+          Widget card(String label, num v, {Color? color, String? to, IconData icon = Icons.bar_chart_rounded}) {
+            final tone = color ?? cs.primary;
+            return Pressable(
+              onTap: to == null ? null : () => context.go(to),
+              child: Container(
+                width: 170,
+                padding: const EdgeInsets.all(16),
+                decoration: softCard(cs),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(color: tone.withValues(alpha: .14), borderRadius: BorderRadius.circular(12)),
+                    child: Icon(icon, size: 20, color: tone),
+                  ),
+                  const SizedBox(height: 12),
+                  AnimatedCount(value: v, style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w800)),
+                  Text(label, style: Theme.of(context).textTheme.bodySmall),
+                ]),
+              ),
+            );
+          }
           final listings = Map<String, dynamic>.from(d['listings'] as Map);
           final orders = Map<String, dynamic>.from(d['orders'] as Map);
           Widget money(String title, Map m) => Container(
@@ -239,15 +252,15 @@ class _DashState extends State<_Dashboard> {
               );
           return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Wrap(spacing: 12, runSpacing: 12, children: [
-              card(context.t('admin.users'), d['users'] as num),
-              card(context.t('nav.shops'), d['shops'] as num),
-              card(context.t('admin.listings_active'), (listings['active'] ?? 0) as num),
-              card(context.t('admin.pending_listings'), d['pending_listings'] as num, color: WM.volt, to: '/admin/listings'),
-              card(context.t('admin.open_reports'), d['open_reports'] as num, color: WM.coral, to: '/admin/reports'),
-              card(context.t('admin.open_disputes'), d['open_disputes'] as num, color: WM.coral, to: '/admin/disputes'),
-              card(context.t('admin.pending_shops'), d['pending_shops'] as num, color: WM.volt, to: '/admin/shops'),
-              card(context.t('admin.deletions'), d['pending_deletions'] as num, color: WM.volt, to: '/admin/deletions'),
-              card(context.t('admin.orders'), orders.values.fold<num>(0, (a, b) => a + (b as num))),
+              card(context.t('admin.users'), d['users'] as num, icon: Icons.people_alt_rounded),
+              card(context.t('nav.shops'), d['shops'] as num, icon: Icons.storefront_rounded),
+              card(context.t('admin.listings_active'), (listings['active'] ?? 0) as num, icon: Icons.sell_rounded),
+              card(context.t('admin.pending_listings'), d['pending_listings'] as num, color: WM.volt, to: '/admin/listings', icon: Icons.hourglass_top_rounded),
+              card(context.t('admin.open_reports'), d['open_reports'] as num, color: WM.coral, to: '/admin/reports', icon: Icons.flag_rounded),
+              card(context.t('admin.open_disputes'), d['open_disputes'] as num, color: WM.coral, to: '/admin/disputes', icon: Icons.gavel_rounded),
+              card(context.t('admin.pending_shops'), d['pending_shops'] as num, color: WM.volt, to: '/admin/shops', icon: Icons.store_mall_directory_rounded),
+              card(context.t('admin.deletions'), d['pending_deletions'] as num, color: WM.volt, to: '/admin/deletions', icon: Icons.person_remove_rounded),
+              card(context.t('admin.orders'), orders.values.fold<num>(0, (a, b) => a + (b as num)), icon: Icons.receipt_long_rounded),
             ]),
             const SizedBox(height: 16),
             Wrap(spacing: 12, runSpacing: 12, children: [

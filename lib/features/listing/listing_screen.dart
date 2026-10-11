@@ -56,7 +56,10 @@ class _State extends ConsumerState<ListingScreen> {
     final wide = isWide(context);
     final gallery = _Gallery(l: l, ctl: _pc, onPage: (i) => setState(() => _page = i), page: _page);
     final info = _Info(l: l, busy: _busy, setBusy: (b) => setState(() => _busy = b));
+    final me = ref.watch(uidProvider);
+    final canBuy = l.status == 'active' && l.quantity > 0 && me != l.sellerId;
     return Scaffold(
+      bottomNavigationBar: !wide && canBuy ? _BuyBar(l: l, busy: _busy) : null,
       body: SafeArea(
         top: wide,
         child: SingleChildScrollView(
@@ -75,6 +78,54 @@ class _State extends ConsumerState<ListingScreen> {
                   : Column(children: [gallery, info]),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Barre d'achat fixe (mobile) : prix à gauche, bouton d'achat à droite.
+class _BuyBar extends ConsumerWidget {
+  const _BuyBar({required this.l, required this.busy});
+  final Listing l;
+  final bool busy;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [BoxShadow(color: WM.signalDeep.withValues(alpha: .10), blurRadius: 30, offset: const Offset(0, -8))],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+          child: Row(children: [
+            Expanded(
+              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(context.t('cart.subtotal'), style: Theme.of(context).textTheme.bodySmall),
+                Text(formatPrice(l.price, l.currency, context.lang), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: cs.primary, fontWeight: FontWeight.w800)),
+              ]),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: GradientButton(
+                label: context.t('listing.buy'),
+                icon: Icons.shopping_bag_rounded,
+                onPressed: busy
+                    ? null
+                    : () async {
+                        if (!requireLogin(context, ref)) return;
+                        await guard(context, () async {
+                          await Repo.cartSet(l.id, 1);
+                          if (context.mounted) context.push('/cart');
+                        });
+                      },
+              ),
+            ),
+          ]),
         ),
       ),
     );
@@ -285,7 +336,7 @@ class _Info extends ConsumerWidget {
           Padding(padding: const EdgeInsets.only(top: 12), child: Material(color: WM.coral.withValues(alpha: .12), borderRadius: BorderRadius.circular(14), child: Padding(padding: const EdgeInsets.all(12), child: Text(l.rejectionReason!)))),
         const SizedBox(height: 18),
         if (mine) _OwnerActions(l: l) else ...[
-          if (canBuy) GradientButton(label: context.t('listing.buy'), icon: Icons.shopping_bag_rounded, onPressed: busy ? null : addToCart).reveal(index: 4),
+          if (canBuy && isWide(context)) GradientButton(label: context.t('listing.buy'), icon: Icons.shopping_bag_rounded, onPressed: busy ? null : addToCart).reveal(index: 4),
           const SizedBox(height: 10),
           Row(children: [
             Expanded(child: OutlinedButton.icon(onPressed: busy ? null : contact, icon: const Icon(Icons.chat_bubble_outline_rounded), label: Text(context.t('listing.contact')))),
