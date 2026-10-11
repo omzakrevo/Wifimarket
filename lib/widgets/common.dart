@@ -12,6 +12,14 @@ import '../data/providers.dart';
 import '../data/repo.dart';
 import 'motion.dart';
 
+/// Fond de carte commun : blanc, très arrondi, bordure fine et ombre bleutée douce.
+BoxDecoration softCard(ColorScheme cs, {double radius = 24}) => BoxDecoration(
+      color: cs.surfaceContainer,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: cs.outlineVariant),
+      boxShadow: WM.softShadow(.06),
+    );
+
 bool isWide(BuildContext c) => MediaQuery.sizeOf(c).width >= 900;
 
 /// Colonnes d'une grille d'annonces selon la largeur.
@@ -123,7 +131,19 @@ class WPage extends StatelessWidget {
           ? null
           : AppBar(
               title: Text(title!),
-              leading: canPop ? IconButton(onPressed: () => context.pop(), icon: const Icon(Icons.arrow_back_rounded)) : null,
+              leadingWidth: 64,
+              leading: canPop
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Pressable(
+                        onTap: () => context.pop(),
+                        child: Container(
+                          decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, shape: BoxShape.circle, boxShadow: WM.softShadow(.08)),
+                          child: const Icon(Icons.arrow_back_rounded, size: 22),
+                        ),
+                      ),
+                    )
+                  : null,
               actions: actions,
             ),
       floatingActionButton: fab,

@@ -62,7 +62,7 @@ class MessagesScreen extends ConsumerWidget {
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(18)),
+                      decoration: softCard(Theme.of(context).colorScheme),
                       child: Row(children: [
                         Avatar(url: c.avatar, name: c.name, size: 48),
                         const SizedBox(width: 12),
@@ -251,7 +251,7 @@ class _ChatState extends ConsumerState<ChatScreen> {
                 child: Container(
                   margin: const EdgeInsets.all(10),
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(14)),
+                  decoration: softCard(cs),
                   child: Row(children: [const Icon(Icons.sell_outlined, size: 18), const SizedBox(width: 8), Expanded(child: Text((_conv!['listings'] as Map)['title'] as String, maxLines: 1, overflow: TextOverflow.ellipsis)), const Icon(Icons.chevron_right_rounded)]),
                 ),
               ),

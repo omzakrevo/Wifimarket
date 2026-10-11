@@ -33,7 +33,7 @@ class AccountScreen extends ConsumerWidget {
           child: Container(
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(18)),
+            decoration: softCard(cs),
             child: Row(children: [
               Container(width: 38, height: 38, decoration: BoxDecoration(color: cs.primary.withValues(alpha: .12), borderRadius: BorderRadius.circular(12)), child: Icon(i, color: cs.primary, size: 20)),
               const SizedBox(width: 14),
@@ -81,7 +81,7 @@ class AccountScreen extends ConsumerWidget {
               child: Container(
                 margin: EdgeInsets.only(right: i == 2 ? 0 : 10),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(18)),
+                decoration: softCard(cs),
                 child: Column(children: [AnimatedCount(value: s.$1, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: cs.primary, fontWeight: FontWeight.w800)), Text(s.$2, style: Theme.of(context).textTheme.bodySmall)]),
               ).reveal(index: i + 1),
             ),
@@ -100,7 +100,7 @@ class AccountScreen extends ConsumerWidget {
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(18)),
+          decoration: softCard(cs),
           child: Column(children: [
             SwitchListTile(title: Text(context.t('common.theme')), secondary: Icon(dark ? Icons.dark_mode_rounded : Icons.light_mode_rounded), value: dark, onChanged: (v) => ref.read(themeProvider.notifier).set(v)),
             ListTile(
@@ -289,7 +289,7 @@ class MyListingsScreen extends ConsumerWidget {
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(18)),
+                      decoration: softCard(cs),
                       child: Row(children: [
                         SizedBox(width: 72, height: 72, child: Net(l.cover, radius: 14)),
                         const SizedBox(width: 12),
@@ -356,7 +356,7 @@ class _SavedState extends ConsumerState<SavedSearchesScreen> {
             for (final (i, r) in rows.indexed)
               Container(
                 margin: const EdgeInsets.only(bottom: 10),
-                decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(18)),
+                decoration: softCard(Theme.of(context).colorScheme),
                 child: ListTile(
                   leading: const Icon(Icons.search_rounded),
                   title: Text((r['label'] as String?) ?? (r['query'] as String?) ?? '—'),

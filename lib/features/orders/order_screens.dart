@@ -44,7 +44,7 @@ class OrdersScreen extends ConsumerWidget {
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(18)),
+                        decoration: softCard(Theme.of(context).colorScheme),
                         child: Row(children: [
                           Expanded(
                             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -131,7 +131,7 @@ class _OrderState extends ConsumerState<OrderDetailScreen> {
             const SizedBox(height: 18),
             Container(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(18)),
+              decoration: softCard(cs),
               child: Column(children: [
                 for (final it in (o['order_items'] as List).cast<Map<String, dynamic>>())
                   Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [Expanded(child: Text('${it['quantity']} × ${it['title']}')), Text(formatPrice((it['unit_price'] as num) * (it['quantity'] as num), cur, lang))])),

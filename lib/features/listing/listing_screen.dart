@@ -418,7 +418,7 @@ class _SellerCard extends ConsumerWidget {
       onTap: () => shop != null ? context.push('/shop/${shop.slug}') : context.push('/seller/${l.sellerId}'),
       child: Container(
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(18), border: Border.all(color: cs.outlineVariant.withValues(alpha: .6))),
+        decoration: softCard(cs),
         child: Row(children: [
           Avatar(url: shop?.logoUrl ?? s?.avatarUrl, name: shop?.name ?? s?.displayName ?? '?', size: 48),
           const SizedBox(width: 12),

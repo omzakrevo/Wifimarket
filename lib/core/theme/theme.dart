@@ -108,6 +108,14 @@ ThemeData buildTheme(Brightness brightness) {
         textStyle: text.labelLarge,
       ),
     ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(999))),
+        side: WidgetStatePropertyAll(BorderSide(color: scheme.outline)),
+        backgroundColor: WidgetStateProperty.resolveWith((st) => st.contains(WidgetState.selected) ? scheme.primary : scheme.surfaceContainer),
+        foregroundColor: WidgetStateProperty.resolveWith((st) => st.contains(WidgetState.selected) ? scheme.onPrimary : scheme.onSurface),
+      ),
+    ),
     chipTheme: ChipThemeData(
       backgroundColor: scheme.surfaceContainer,
       selectedColor: scheme.primaryContainer,

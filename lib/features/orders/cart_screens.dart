@@ -60,7 +60,7 @@ class CartScreen extends ConsumerWidget {
               Container(
                 margin: const EdgeInsets.only(bottom: 14),
                 padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(22)),
+                decoration: softCard(cs),
                 child: Column(children: [
                   for (final c in e.value)
                     Padding(
@@ -221,7 +221,7 @@ class _CheckoutState extends ConsumerState<CheckoutScreen> {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(16)),
+                  decoration: softCard(cs),
                   child: Column(children: [
                     for (final c in e.value) Row(children: [Expanded(child: Text('${c.qty} × ${c.listing.title}', maxLines: 1, overflow: TextOverflow.ellipsis)), Text(formatPrice(c.listing.price * c.qty, cur, lang))]),
                     const Divider(),

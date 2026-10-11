@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/i18n/i18n.dart';
+import '../../core/theme/colors.dart';
 import '../../core/theme/motion.dart';
 import '../../core/utils/format.dart';
 import '../../data/models.dart';
@@ -175,7 +176,7 @@ class _SearchState extends ConsumerState<SearchScreen> {
                       child: Container(
                         width: 52,
                         height: 52,
-                        decoration: BoxDecoration(color: cs.primary.withValues(alpha: .12), borderRadius: BorderRadius.circular(16)),
+                        decoration: BoxDecoration(color: cs.surfaceContainer, shape: BoxShape.circle, boxShadow: WM.softShadow(.08)),
                         child: Icon(Icons.tune_rounded, color: cs.primary),
                       ),
                     ),
