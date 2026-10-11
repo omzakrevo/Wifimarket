@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   apk:
@@ -46,3 +46,17 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 30
+
+      # Lien de téléchargement direct (page « Releases » du dépôt), plus simple que l'artefact, notamment depuis un téléphone.
+      - name: Publier l'APK dans les Releases
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk wifimarket.apk
+          gh release delete android-latest --yes --cleanup-tag || true
+          gh release create android-latest wifimarket.apk \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "WiFiMarket Android (dernière version)" \
+            --notes "APK de la dernière compilation (commit $GITHUB_SHA), signé avec la clé de debug. Autorisez les sources inconnues pour l'installer."
