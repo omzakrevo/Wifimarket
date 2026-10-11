@@ -20,6 +20,40 @@ BoxDecoration softCard(ColorScheme cs, {double radius = 24}) => BoxDecoration(
       boxShadow: WM.softShadow(.06),
     );
 
+/// Bloc de formulaire : carte blanche avec pastille d'icône, titre et champs.
+class FormSection extends StatelessWidget {
+  const FormSection({required this.icon, required this.title, this.hint, required this.children});
+  final IconData icon;
+  final String title;
+  final String? hint;
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: softCard(cs),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(color: cs.primary.withValues(alpha: .12), borderRadius: BorderRadius.circular(11)),
+            child: Icon(icon, size: 19, color: cs.primary),
+          ),
+          const SizedBox(width: 10),
+          Expanded(child: Text(title, style: Theme.of(context).textTheme.titleMedium)),
+        ]),
+        if (hint != null) ...[const SizedBox(height: 6), Text(hint!, style: Theme.of(context).textTheme.bodySmall)],
+        const SizedBox(height: 14),
+        ...children,
+      ]),
+    ).reveal();
+  }
+}
+
 bool isWide(BuildContext c) => MediaQuery.sizeOf(c).width >= 900;
 
 /// Colonnes d'une grille d'annonces selon la largeur.

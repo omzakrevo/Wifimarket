@@ -55,11 +55,15 @@ class WantedScreen extends ConsumerWidget {
                             Expanded(child: Text(r['title'] as String, style: Theme.of(context).textTheme.titleMedium)),
                             StatusChip(context.t('wanted.s.${r['status']}'), tone: statusTone(r['status'] as String)),
                           ]),
-                          const SizedBox(height: 6),
+                          if (r['budget'] != null) ...[
+                            const SizedBox(height: 8),
+                            Text(context.t('wanted.budget'), style: Theme.of(context).textTheme.bodySmall),
+                            Text(formatPrice(r['budget'] as num, r['currency_code'] as String, lang), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w800)),
+                          ],
+                          const SizedBox(height: 8),
                           Wrap(spacing: 8, runSpacing: 4, children: [
-                            if (r['categories'] != null) Badge2(((r['categories'] as Map)[lang == 'en' ? 'name_en' : 'name_fr']) as String, color: WM.signalDeep),
-                            if (r['budget'] != null) Badge2('${context.t('wanted.budget')} ${formatPrice(r['budget'] as num, r['currency_code'] as String, lang)}', color: WM.wave),
-                            Badge2([r['city'], r['country_code']].whereType<String>().join(' · '), color: Colors.blueGrey),
+                            if (r['categories'] != null) Badge2(((r['categories'] as Map)[lang == 'en' ? 'name_en' : 'name_fr']) as String, color: Theme.of(context).colorScheme.secondaryContainer, fg: Theme.of(context).colorScheme.onSecondaryContainer),
+                            Badge2([r['city'], r['country_code']].whereType<String>().join(' · '), color: Theme.of(context).colorScheme.surfaceContainerHigh, fg: Theme.of(context).colorScheme.onSurface, icon: Icons.place_outlined),
                           ]),
                           const SizedBox(height: 6),
                           Text(timeAgo(DateTime.parse(r['created_at'] as String), lang), style: Theme.of(context).textTheme.bodySmall),
@@ -119,7 +123,8 @@ class _NewState extends ConsumerState<WantedNewScreen> {
         key: _form,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(context.t('wanted.new_sub')),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
+          FormSection(icon: Icons.travel_explore_rounded, title: context.t('wanted.what'), children: [
           field(_title, context.t('wanted.what'), hint: context.t('wanted.what_ph'), validator: (v) => (v ?? '').trim().length < 5 ? context.t('form.err_invalid') : null),
           DropdownButtonFormField<int?>(
             initialValue: categoryId,
@@ -148,7 +153,8 @@ class _NewState extends ConsumerState<WantedNewScreen> {
             ChoiceChip(label: Text(context.t('wanted.any')), selected: condition == 'any', onSelected: (_) => setState(() => condition = 'any')),
             for (final c in conditions) ChoiceChip(label: Text(context.t('cond.$c')), selected: condition == c, onSelected: (_) => setState(() => condition = c)),
           ]),
-          const SizedBox(height: 16),
+          ]),
+          FormSection(icon: Icons.payments_rounded, title: context.t('form.s_price'), children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(flex: 3, child: field(_budget, context.t('wanted.budget'), type: TextInputType.number)),
             const SizedBox(width: 12),
@@ -179,8 +185,10 @@ class _NewState extends ConsumerState<WantedNewScreen> {
             const SizedBox(width: 12),
             Expanded(child: field(_city, context.t('common.city'))),
           ]),
-          const SizedBox(height: 14),
+          ]),
+          FormSection(icon: Icons.notes_rounded, title: context.t('listing.description'), children: [
           field(_desc, context.t('listing.description'), lines: 4),
+          ]),
           GradientButton(
             label: context.t('wanted.publish'),
             loading: busy,

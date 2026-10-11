@@ -161,14 +161,35 @@ class _NegoCard extends ConsumerWidget {
           ),
           StatusChip(context.t('nego.s.$status'), tone: statusTone(status)),
         ]),
-        const SizedBox(height: 10),
-        Text(
-          kind == 'offer'
-              ? '${context.t('nego.offer')} : ${formatPrice(n['offered_price'] as num, cur, context.lang)}'
-              : '${context.t('nego.exchange')}${n['cash_top_up'] != null ? ' + ${formatPrice(n['cash_top_up'] as num, cur, context.lang)}' : ''}',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: cs.primary, fontWeight: FontWeight.w800),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(color: cs.primary.withValues(alpha: .08), borderRadius: BorderRadius.circular(16)),
+          child: Row(children: [
+            Icon(kind == 'offer' ? Icons.sell_outlined : Icons.swap_horiz_rounded, color: cs.primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(kind == 'offer' ? context.t('nego.offer') : context.t('nego.exchange'), style: Theme.of(context).textTheme.bodySmall),
+                Text(
+                  kind == 'offer'
+                      ? formatPrice(n['offered_price'] as num, cur, context.lang)
+                      : (n['cash_top_up'] != null ? '+ ${formatPrice(n['cash_top_up'] as num, cur, context.lang)}' : context.t('nego.exchange')),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(color: cs.primary, fontWeight: FontWeight.w800),
+                ),
+              ]),
+            ),
+          ]),
         ),
-        if ((n['note'] as String?)?.isNotEmpty ?? false) Padding(padding: const EdgeInsets.only(top: 4), child: Text(n['note'] as String)),
+        if ((n['note'] as String?)?.isNotEmpty ?? false)
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: cs.surfaceContainerHigh, borderRadius: BorderRadius.circular(14)),
+            child: Text(n['note'] as String, style: Theme.of(context).textTheme.bodyMedium),
+          ),
         const SizedBox(height: 10),
         Wrap(spacing: 8, runSpacing: 8, children: [
           if (myTurn) ...[

@@ -162,24 +162,58 @@ class _LoaderState extends State<_Loader> {
 }
 
 class _Row extends StatelessWidget {
-  const _Row({required this.title, this.subtitle, this.chips = const [], this.actions = const [], this.index = 0});
+  const _Row({required this.title, this.subtitle, this.chips = const [], this.actions = const [], this.index = 0, this.icon = Icons.article_outlined});
   final String title;
   final String? subtitle;
   final List<Widget> chips;
   final List<Widget> actions;
   final int index;
+  final IconData icon;
   @override
-  Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
-        decoration: softCard(Theme.of(context).colorScheme),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title, style: Theme.of(context).textTheme.titleSmall),
-          if (subtitle != null && subtitle!.isNotEmpty) Text(subtitle!, style: Theme.of(context).textTheme.bodySmall, maxLines: 3, overflow: TextOverflow.ellipsis),
-          if (chips.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 6, runSpacing: 6, children: chips)),
-          if (actions.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 10), child: Wrap(spacing: 8, runSpacing: 6, children: actions)),
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    // Boutons compacts dans les listes d'administration.
+    final compact = Theme.of(context).copyWith(
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(0, 38),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          side: BorderSide(color: cs.outline),
+          backgroundColor: cs.surfaceContainer,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+    );
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: softCard(cs),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(color: cs.primary.withValues(alpha: .12), borderRadius: BorderRadius.circular(14)),
+            child: Icon(icon, size: 21, color: cs.primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(title, style: Theme.of(context).textTheme.titleSmall),
+              if (subtitle != null && subtitle!.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 2), child: Text(subtitle!, style: Theme.of(context).textTheme.bodySmall, maxLines: 3, overflow: TextOverflow.ellipsis)),
+              if (chips.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Wrap(spacing: 6, runSpacing: 6, children: chips)),
+            ]),
+          ),
         ]),
-      ).reveal(index: index);
+        if (actions.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Divider(color: cs.outlineVariant, height: 1),
+          const SizedBox(height: 12),
+          Theme(data: compact, child: Wrap(spacing: 8, runSpacing: 8, children: actions)),
+        ],
+      ]),
+    ).reveal(index: index);
+  }
 }
 
 Widget _act(BuildContext c, String label, Future<void> Function() job, VoidCallback reload, {bool danger = false, String? confirm}) {
@@ -295,6 +329,7 @@ class _ListingsAdminState extends State<_ListingsAdmin> {
             for (final (i, r) in rows.indexed)
               _Row(
                 index: i,
+                icon: Icons.sell_rounded,
                 title: r['title'] as String,
                 subtitle: '${formatPrice(r['price'] as num, r['currency_code'] as String, c.lang)} · ${r['city'] ?? ''} ${r['country_code']}\n${r['description'] ?? ''}',
                 chips: [StatusChip(c.t('status.${r['status']}'), tone: statusTone(r['status'] as String))],
@@ -380,6 +415,7 @@ class _UsersState extends State<_UsersAdmin> {
             for (final (i, r) in rows.indexed)
               _Row(
                 index: i,
+                icon: Icons.person_rounded,
                 title: r['display_name'] as String,
                 subtitle: '${r['country_code'] ?? ''} · ${r['id']}',
                 chips: [StatusChip(c.t('verif.${r['verification_status']}'), tone: statusTone(r['verification_status'] as String)), if (r['is_suspended'] == true) StatusChip(c.t('admin.suspended'), tone: 3)],
@@ -412,6 +448,7 @@ class _ShopsAdmin extends StatelessWidget {
           for (final (i, r) in rows.indexed)
             _Row(
               index: i,
+                icon: Icons.storefront_rounded,
               title: r['name'] as String,
               subtitle: '${r['city'] ?? ''} ${r['country_code'] ?? ''} · ${r['plan']}',
               chips: [StatusChip(c.t('verif.${r['verification_status']}'), tone: statusTone(r['verification_status'] as String)), if (r['is_active'] != true) StatusChip(c.t('status.paused'), tone: 3)],
@@ -436,6 +473,7 @@ class _OrdersAdmin extends StatelessWidget {
           for (final (i, r) in rows.indexed)
             _Row(
               index: i,
+                icon: Icons.receipt_long_rounded,
               title: '#${r['order_number']} · ${formatPrice(r['total'] as num, r['currency_code'] as String, c.lang)}',
               subtitle: c.t('ship.${r['delivery_method']}'),
               chips: [StatusChip(c.t('order.s.${r['status']}'), tone: statusTone(r['status'] as String))],

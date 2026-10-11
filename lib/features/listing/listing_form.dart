@@ -198,7 +198,6 @@ class _FormState extends ConsumerState<ListingFormScreen> {
     final cities = (ref.watch(citiesProvider).asData?.value ?? []).where((c) => c.country == country).toList();
     final shops = ref.watch(_myShopsProvider).asData?.value ?? [];
     final roots = cats.where((c) => c.parentId == null).toList();
-    final cs = Theme.of(context).colorScheme;
     final catItems = <DropdownMenuItem<int>>[
       for (final r in roots) ...[
         for (final c in cats.where((c) => c.parentId == r.id)) DropdownMenuItem(value: c.id, child: Text('${r.name(lang)} › ${c.name(lang)}', overflow: TextOverflow.ellipsis)),
@@ -214,10 +213,8 @@ class _FormState extends ConsumerState<ListingFormScreen> {
         key: _form,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(context.t('form.sell_sub'), style: Theme.of(context).textTheme.bodyMedium).reveal(),
-          const SizedBox(height: 18),
-          Text(context.t('form.photos'), style: Theme.of(context).textTheme.titleMedium),
-          Text(context.t('form.photos_hint'), style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
+          FormSection(icon: Icons.photo_library_rounded, title: context.t('form.photos'), hint: context.t('form.photos_hint'), children: [
           SizedBox(
             height: 108,
             child: ListView(scrollDirection: Axis.horizontal, children: [
@@ -253,7 +250,8 @@ class _FormState extends ConsumerState<ListingFormScreen> {
               if (!pics.any((p) => p.isVideo)) _AddTile(icon: Icons.videocam_rounded, label: context.t('form.add_video'), onTap: _pickVideo),
             ]),
           ),
-          const SizedBox(height: 22),
+          ]),
+          FormSection(icon: Icons.info_outline_rounded, title: context.t('form.s_info'), children: [
           field(_title, context.t('form.title'), hint: context.t('form.title_ph'), validator: (v) => (v ?? '').trim().length < 5 ? context.t('form.err_invalid') : null, maxLength: 120),
           DropdownButtonFormField<int>(
             initialValue: catItems.any((e) => e.value == categoryId) ? categoryId : null,
@@ -281,7 +279,8 @@ class _FormState extends ConsumerState<ListingFormScreen> {
           Text(context.t('listing.condition'), style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 8),
           Wrap(spacing: 8, runSpacing: 8, children: [for (final c in conditions) ChoiceChip(label: Text(context.t('cond.$c')), selected: condition == c, onSelected: (_) => setState(() => condition = c))]),
-          const SizedBox(height: 16),
+          ]),
+          FormSection(icon: Icons.payments_rounded, title: context.t('form.s_price'), children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(flex: 3, child: field(_price, context.t('common.price'), hint: context.t('form.price_place'), type: const TextInputType.numberWithOptions(decimal: true), validator: (v) => (parseNum(v) ?? -1) < 0 ? context.t('form.err_invalid') : null)),
             const SizedBox(width: 12),
@@ -297,6 +296,8 @@ class _FormState extends ConsumerState<ListingFormScreen> {
             const SizedBox(width: 12),
             Expanded(flex: 2, child: field(_qty, context.t('listing.quantity'), type: TextInputType.number, validator: (v) => (int.tryParse((v ?? '').trim()) ?? 0) < 1 ? context.t('form.err_invalid') : null)),
           ]),
+          ]),
+          FormSection(icon: Icons.place_outlined, title: context.t('form.s_place'), children: [
           Row(children: [
             Expanded(
               child: DropdownButtonFormField<String>(
@@ -321,19 +322,19 @@ class _FormState extends ConsumerState<ListingFormScreen> {
               ),
             ),
           ]),
-          const SizedBox(height: 14),
+          ]),
+          FormSection(icon: Icons.notes_rounded, title: context.t('form.s_details'), children: [
           field(_desc, context.t('listing.description'), lines: 5, maxLength: 4000),
           field(_defects, context.t('listing.defects'), hint: context.t('form.defects_hint'), lines: 2),
           field(_warranty, context.t('listing.warranty')),
-          Container(
-            decoration: softCard(cs),
-            child: Column(children: [
+          ]),
+          FormSection(icon: Icons.tune_rounded, title: context.t('form.s_options'), children: [
+          Column(children: [
               SwitchListTile(title: Text(context.t('form.delivery')), value: delivery, onChanged: (v) => setState(() => delivery = v)),
               SwitchListTile(title: Text(context.t('form.negotiable')), value: negotiable, onChanged: (v) => setState(() => negotiable = v)),
               SwitchListTile(title: Text(context.t('form.exchange')), value: exchange, onChanged: (v) => setState(() => exchange = v)),
               AnimatedSize(duration: Motion.base, child: exchange ? Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 12), child: field(_exWanted, context.t('form.exchange_wanted'))) : const SizedBox(width: double.infinity)),
             ]),
-          ),
           if (shops.isNotEmpty) ...[
             const SizedBox(height: 14),
             DropdownButtonFormField<String?>(
@@ -343,7 +344,8 @@ class _FormState extends ConsumerState<ListingFormScreen> {
               onChanged: (v) => setState(() => shopId = v),
             ),
           ],
-          const SizedBox(height: 10),
+          ]),
+          const SizedBox(height: 4),
           Text(context.t('form.moderation_note'), style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 18),
           GradientButton(label: context.t('form.publish'), icon: Icons.rocket_launch_rounded, loading: busy, onPressed: () => _save(true)),
