@@ -1,0 +1,24 @@
+\set ON_ERROR_STOP on
+set client_min_messages = notice;
+begin;
+select t.anon();
+select t.ok((select count(*) from public.search_listings('litebeam')) = 1, 'recherche plein texte : "litebeam"');
+select t.ok((select count(*) from public.search_listings('lite')) >= 2, 'préfixes : "lite" (LiteBeam, LiteAP)');
+select t.ok((select count(*) from public.search_listings('NANOSTATION m5')) = 1, 'insensible à la casse, plusieurs termes');
+select t.ok((select count(*) from public.search_listings('reconditionne')) >= 1, 'insensible aux accents (reconditionné)');
+select t.ok((select count(*) from public.search_listings(p_category => 'ubiquiti-litebeam')) = 1, 'filtre par sous-catégorie');
+select t.ok((select count(*) from public.search_listings(p_category => 'antennes-radio')) = 11, 'filtre par catégorie parente (inclut les enfants)');
+select t.ok((select count(*) from public.search_listings(p_country => 'BF')) > 5, 'filtre pays');
+select t.ok((select count(*) from public.search_listings(p_country => 'BF', p_city => 'bobo-dioulasso')) >= 3, 'filtre ville (insensible à la casse)');
+select t.ok((select count(*) from public.search_listings(p_condition => 'broken')) = 1, 'filtre état');
+select t.ok((select count(*) from public.search_listings(p_currency => 'XOF', p_min => 40000, p_max => 50000)) >= 2, 'filtre prix dans une devise');
+select t.ok((select count(*) from public.search_listings(p_currency => 'GHS')) = 4, 'devise GHS : pas de mélange avec XOF');
+select t.ok((select price from public.search_listings(p_currency => 'XOF', p_sort => 'price_asc', p_limit => 1)) = 6000, 'tri prix croissant');
+select t.ok((select price from public.search_listings(p_currency => 'XOF', p_sort => 'price_desc', p_limit => 1)) = 240000, 'tri prix décroissant');
+select t.ok((select count(*) from public.search_listings(p_delivery => true)) < (select count(*) from public.search_listings(p_limit => 60)), 'filtre livraison');
+select t.ok((select count(*) from public.search_listings(p_exchange => true)) >= 1, 'filtre échange');
+select t.ok(public.count_listings() = 30, 'count_listings = 30');
+select t.ok((select is_sponsored from public.search_listings(p_sort => 'relevance', p_limit => 1)), 'annonces sponsorisées remontées en tête');
+select t.ok((select count(*) from public.search_listings(p_limit => 5, p_offset => 5)) = 5, 'pagination');
+select t.ok((select count(*) from public.search_listings('x'';drop table listings;--')) = 0, 'injection neutralisée');
+rollback;

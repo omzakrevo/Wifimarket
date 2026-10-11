@@ -225,3 +225,16 @@ insert into storage.objects(bucket_id, name) values ('listing-media', t.uid('kof
 select t.fails($$insert into storage.objects(bucket_id, name) values ('listing-media', t.uid('awa')::text || '/a.jpg')$$, 'upload dans le dossier d''un autre refusé');
 select t.fails($$insert into storage.objects(bucket_id, name) values ('chat-images', 'x/y/z.jpg')$$, 'image de chat hors conversation refusée');
 rollback;
+
+-- ===================== RGPD : anonymisation =====================
+begin;
+select t.login('demo_buyer');
+select t.fails($$select public.anonymize_user(t.uid('awa'))$$, 'un utilisateur ne peut pas anonymiser un autre compte');
+select t.login('demo_admin');
+select public.anonymize_user(t.uid('awa'));
+select t.root();
+select t.ok((select display_name from public.profiles where id = t.uid('awa')) = 'Compte supprimé', 'profil anonymisé');
+select t.ok((select count(*) from public.private_profiles where id = t.uid('awa')) = 0, 'données privées supprimées');
+select t.ok(not exists (select 1 from public.listings where seller_id = t.uid('awa') and status = 'active'), 'annonces retirées');
+select t.ok(public.user_has_orders(t.uid('ibrahim')), 'compte avec commandes détecté (anonymisation plutôt que suppression)');
+rollback;
