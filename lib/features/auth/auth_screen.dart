@@ -14,6 +14,12 @@ import '../../widgets/motion.dart';
 
 final _emailRe = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
+/// Numéro au format international : retire espaces, tirets et parenthèses, « 00… » devient « +… ».
+String normalizePhone(String v) {
+  final p = v.replaceAll(RegExp(r'[\s\-.()]'), '');
+  return p.startsWith('00') ? '+${p.substring(2)}' : p;
+}
+
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key, this.next, this.signup = false});
   final String? next;
@@ -48,7 +54,7 @@ class _AuthState extends ConsumerState<AuthScreen> {
 
   Future<void> _submit() async {
     if (!(_form.currentState?.validate() ?? false)) return;
-    if (signup && !terms) return toast(context, context.t('auth.err.terms'), error: true);
+    if (signup && !terms && !(phoneMode && otpStage)) return toast(context, context.t('auth.err.terms'), error: true);
     setState(() {
       busy = true;
       info = null;
@@ -60,10 +66,9 @@ class _AuthState extends ConsumerState<AuthScreen> {
         setState(() => info = context.t('auth.reset_sent'));
       } else if (phoneMode) {
         if (!otpStage) {
-          await auth.signInWithOtp(phone: _phone.text.trim());
-          setState(() => otpStage = true);
+          await _sendCode();
         } else {
-          await auth.verifyOTP(phone: _phone.text.trim(), token: _otp.text.trim(), type: OtpType.sms);
+          await auth.verifyOTP(phone: normalizePhone(_phone.text), token: _otp.text.trim(), type: OtpType.sms);
           _done();
         }
       } else if (signup) {
@@ -82,6 +87,13 @@ class _AuthState extends ConsumerState<AuthScreen> {
     } finally {
       if (mounted) setState(() => busy = false);
     }
+  }
+
+  /// Envoie (ou renvoie) le code SMS. Un nouveau numéro crée le compte ; le nom saisi à l'inscription devient le nom affiché.
+  Future<void> _sendCode() async {
+    final name = _name.text.trim();
+    await sb.auth.signInWithOtp(phone: normalizePhone(_phone.text), data: signup && name.length >= 2 ? {'display_name': name} : null);
+    if (mounted) setState(() => otpStage = true);
   }
 
   Future<void> _google() async {
@@ -110,17 +122,47 @@ class _AuthState extends ConsumerState<AuthScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             AnimatedSwitcher(duration: Motion.base, child: Text(title, key: ValueKey(title), style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800))),
             const SizedBox(height: 18),
+            if (AppConfig.phoneAuth && !forgot) ...[
+              SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<bool>(
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(value: false, icon: const Icon(Icons.mail_outline_rounded, size: 18), label: Text(context.t('auth.email'))),
+                    ButtonSegment(value: true, icon: const Icon(Icons.phone_outlined, size: 18), label: Text(context.t('auth.phone'))),
+                  ],
+                  selected: {phoneMode},
+                  onSelectionChanged: (v) => setState(() {
+                    phoneMode = v.first;
+                    otpStage = false;
+                    info = null;
+                  }),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             if (info != null) Container(margin: const EdgeInsets.only(bottom: 14), padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: WM.signal.withValues(alpha: .12), borderRadius: BorderRadius.circular(14)), child: Text(info!)).popIn(),
             if (phoneMode && !forgot) ...[
-              field(_phone, context.t('auth.phone'), hint: '+22670000000', type: TextInputType.phone, icon: Icons.phone_outlined, validator: (v) => RegExp(r'^\+\d{8,15}$').hasMatch((v ?? '').trim()) ? null : context.t('auth.err.phone_format')),
-              if (otpStage) field(_otp, context.t('auth.otp_code', {'phone': _phone.text}), type: TextInputType.number, icon: Icons.sms_outlined),
+              if (signup && !otpStage) field(_name, context.t('auth.display_name'), icon: Icons.person_outline_rounded, validator: (v) => (v ?? '').trim().length < 2 ? context.t('err.generic') : null),
+              field(_phone, context.t('auth.phone'), hint: '+22670000000', type: TextInputType.phone, icon: Icons.phone_outlined, validator: (v) => RegExp(r'^\+\d{8,15}$').hasMatch(normalizePhone(v ?? '')) ? null : context.t('auth.err.phone_format')),
+              if (!otpStage) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(context.t('auth.phone_hint'), style: Theme.of(context).textTheme.bodySmall)),
+              if (otpStage) ...[
+                field(_otp, context.t('auth.otp_code', {'phone': _phone.text}), type: TextInputType.number, icon: Icons.sms_outlined),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(spacing: 4, children: [
+                    TextButton(onPressed: busy ? null : () => guard(context, _sendCode, ok: 'auth.code_resent'), child: Text(context.t('auth.resend_code'))),
+                    TextButton(onPressed: () => setState(() => otpStage = false), child: Text(context.t('auth.change_number'))),
+                  ]),
+                ),
+              ],
             ] else ...[
               if (signup && !forgot) field(_name, context.t('auth.display_name'), icon: Icons.person_outline_rounded, validator: (v) => (v ?? '').trim().length < 2 ? context.t('err.generic') : null),
               field(_email, context.t('auth.email'), type: TextInputType.emailAddress, icon: Icons.mail_outline_rounded, validator: (v) => _emailRe.hasMatch((v ?? '').trim()) ? null : context.t('auth.err.invalid_email')),
               if (!forgot)
                 field(_pw, context.t('auth.password'), obscure: !showPw, icon: Icons.lock_outline_rounded, suffix: IconButton(icon: Icon(showPw ? Icons.visibility_off_outlined : Icons.visibility_outlined), onPressed: () => setState(() => showPw = !showPw)), validator: (v) => (v ?? '').length < 8 ? context.t('auth.err.weak_password') : null),
             ],
-            if (signup && !forgot && !phoneMode)
+            if (signup && !forgot && !(phoneMode && otpStage))
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
@@ -140,8 +182,6 @@ class _AuthState extends ConsumerState<AuthScreen> {
               const SizedBox(height: 4),
               OutlinedButton.icon(onPressed: _google, icon: const Icon(Icons.g_mobiledata_rounded, size: 28), label: Text(context.t('auth.google')), style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50))),
             ],
-            if (AppConfig.phoneAuth && !forgot)
-              TextButton(onPressed: () => setState(() { phoneMode = !phoneMode; otpStage = false; }), child: Text(phoneMode ? context.t('auth.login') : context.t('auth.phone_login'))),
             Center(
               child: TextButton(
                 onPressed: () => setState(() {

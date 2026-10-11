@@ -8,5 +8,5 @@ class AppConfig {
       String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'sb_publishable_yBIBPnUe4j966Xp-BV3NIQ_WprJ2t4l');
   static const siteUrl = String.fromEnvironment('SITE_URL', defaultValue: 'https://wifimarket.tech');
   static const googleAuth = bool.fromEnvironment('AUTH_GOOGLE', defaultValue: false);
-  static const phoneAuth = bool.fromEnvironment('AUTH_PHONE', defaultValue: false);
+  static const phoneAuth = bool.fromEnvironment('AUTH_PHONE', defaultValue: true);
 }
