@@ -326,7 +326,7 @@ class _FormState extends ConsumerState<ListingFormScreen> {
           field(_defects, context.t('listing.defects'), hint: context.t('form.defects_hint'), lines: 2),
           field(_warranty, context.t('listing.warranty')),
           Container(
-            decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(18)),
+            decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(18)),
             child: Column(children: [
               SwitchListTile(title: Text(context.t('form.delivery')), value: delivery, onChanged: (v) => setState(() => delivery = v)),
               SwitchListTile(title: Text(context.t('form.negotiable')), value: negotiable, onChanged: (v) => setState(() => negotiable = v)),

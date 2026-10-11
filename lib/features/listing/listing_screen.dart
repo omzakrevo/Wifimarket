@@ -397,7 +397,7 @@ class _SpecTable extends StatelessWidget {
       child: Column(children: [
         for (final (i, e) in rows.entries.indexed)
           Container(
-            color: i.isEven ? cs.surfaceContainerLow : null,
+            color: i.isEven ? cs.surfaceContainer : null,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             child: Row(children: [Expanded(flex: 2, child: Text(e.key, style: Theme.of(context).textTheme.bodySmall)), Expanded(flex: 3, child: Text(e.value, style: const TextStyle(fontWeight: FontWeight.w600)))]),
           ),
@@ -418,7 +418,7 @@ class _SellerCard extends ConsumerWidget {
       onTap: () => shop != null ? context.push('/shop/${shop.slug}') : context.push('/seller/${l.sellerId}'),
       child: Container(
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(18), border: Border.all(color: cs.outlineVariant.withValues(alpha: .6))),
+        decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(18), border: Border.all(color: cs.outlineVariant.withValues(alpha: .6))),
         child: Row(children: [
           Avatar(url: shop?.logoUrl ?? s?.avatarUrl, name: shop?.name ?? s?.displayName ?? '?', size: 48),
           const SizedBox(width: 12),

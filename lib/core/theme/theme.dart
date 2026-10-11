@@ -49,7 +49,7 @@ ThemeData buildTheme(Brightness brightness) {
   );
 
   OutlineInputBorder border(Color c, [double w = 1]) =>
-      OutlineInputBorder(borderRadius: BorderRadius.circular(999), borderSide: BorderSide(color: c, width: w));
+      OutlineInputBorder(borderRadius: BorderRadius.circular(28), borderSide: BorderSide(color: c, width: w));
 
   return base.copyWith(
     textTheme: text,
@@ -109,9 +109,8 @@ ThemeData buildTheme(Brightness brightness) {
     ),
     chipTheme: ChipThemeData(
       backgroundColor: scheme.surfaceContainer,
-      selectedColor: scheme.primary,
-      secondarySelectedColor: scheme.primary,
-      checkmarkColor: scheme.onPrimary,
+      selectedColor: scheme.primaryContainer,
+      checkmarkColor: scheme.primary,
       side: BorderSide(color: scheme.outline),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
       labelStyle: text.labelLarge,

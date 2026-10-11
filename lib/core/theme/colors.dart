@@ -33,8 +33,8 @@ class WM {
       ];
 
   static const nightGradient = LinearGradient(
-    colors: [ink, night],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
+    colors: [signal, signalDeep, wave],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
   );
 }

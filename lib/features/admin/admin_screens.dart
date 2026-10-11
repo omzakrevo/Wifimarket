@@ -172,7 +172,7 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerLow, borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(16)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(title, style: Theme.of(context).textTheme.titleSmall),
           if (subtitle != null && subtitle!.isNotEmpty) Text(subtitle!, style: Theme.of(context).textTheme.bodySmall, maxLines: 3, overflow: TextOverflow.ellipsis),
@@ -221,7 +221,7 @@ class _DashState extends State<_Dashboard> {
                 child: Container(
                   width: 170,
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(18), border: Border.all(color: (color ?? cs.outlineVariant).withValues(alpha: .5))),
+                  decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(18), border: Border.all(color: (color ?? cs.outlineVariant).withValues(alpha: .5))),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [AnimatedCount(value: v, style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: color ?? cs.primary, fontWeight: FontWeight.w800)), Text(label, style: Theme.of(context).textTheme.bodySmall)]),
                 ),
               );
@@ -229,7 +229,7 @@ class _DashState extends State<_Dashboard> {
           final orders = Map<String, dynamic>.from(d['orders'] as Map);
           Widget money(String title, Map m) => Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: cs.surfaceContainerLow, borderRadius: BorderRadius.circular(18)),
+                decoration: BoxDecoration(color: cs.surfaceContainer, borderRadius: BorderRadius.circular(18)),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(title, style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 6),

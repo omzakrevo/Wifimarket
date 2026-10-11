@@ -517,7 +517,7 @@ class _Categories extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: cs.surfaceContainerLow,
+                          color: cs.surfaceContainer,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: cs.outlineVariant.withValues(alpha: .6),
@@ -736,7 +736,7 @@ class ShopTile extends StatelessWidget {
         width: 190,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: cs.surfaceContainerLow,
+          color: cs.surfaceContainer,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: cs.outlineVariant.withValues(alpha: .6)),
         ),
@@ -788,7 +788,7 @@ class _Footer extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
