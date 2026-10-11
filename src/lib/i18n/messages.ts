@@ -534,5 +534,7 @@ export const messages = {
   "admin.top_level": ["(Niveau principal)", "(Top level)"],
   "admin.all_countries": ["Tous pays", "All countries"],
   "admin.grant_role": ["Attribuer", "Grant"],
+  "order.pay_online": ["Payer en ligne", "Pay online"],
+  "order.pay_error": ["Le paiement en ligne n'est pas disponible pour cette commande.", "Online payment is not available for this order."],
 } as const satisfies Record<string, readonly [string, string]>;
 export type MessageKey = keyof typeof messages;

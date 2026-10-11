@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Badge, Card, PageTitle } from "@/components/ui/card";
 import { OrderActions } from "@/components/order-actions";
+import { PayOnlineButton } from "@/components/pay-online-button";
 import { ReviewForm } from "@/components/negotiation-actions";
 import { getUser } from "@/lib/auth";
 import { getT } from "@/lib/i18n";
@@ -30,6 +31,9 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
     .order("created_at", { ascending: false });
   const orders = (data ?? []) as unknown as Order[];
   const { data: myReviews } = await supabase.from("reviews").select("order_id").eq("reviewer_id", user.id).not("order_id", "is", null);
+  const { data: paystack } = await supabase.from("payment_providers").select("enabled,eligibility_verified,currencies,sandbox").eq("code", "paystack").maybeSingle();
+  const canPayOnline = (o: Order) => Boolean(paystack?.enabled && paystack.eligibility_verified && paystack.currencies.includes(o.currency_code) && process.env.PAYSTACK_SECRET_KEY)
+    && ["pending", "awaiting_payment"].includes(o.status) && o.buyer_id === user.id && !o.payments.some((p) => p.status === "succeeded");
   const reviewed = new Set((myReviews ?? []).map((r) => r.order_id as string));
   const tone = (s: string) => (["completed", "delivered", "paid"].includes(s) ? "success" : ["cancelled", "refunded", "disputed"].includes(s) ? "danger" : "warn") as "success" | "danger" | "warn";
   const section = (title: string, list: Order[], role: "buyer" | "seller") => (
@@ -52,6 +56,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                 <p className="text-xs text-muted">{t("order.payment")} : {o.payments.length ? o.payments.map((p) => `${p.provider} (${p.status}${p.is_sandbox ? ", sandbox" : ""})`).join(", ") : t("checkout.pay_offline")}</p>
                 {o.shipments[0]?.tracking_number && <p className="text-sm">{t("order.tracking")} : <strong>{o.shipments[0].tracking_number}</strong>{o.shipments[0].carrier ? ` (${o.shipments[0].carrier})` : ""}</p>}
                 {o.shipping_address && <p className="text-xs text-muted">{[o.shipping_address.recipient, o.shipping_address.line1, o.shipping_address.city, o.shipping_address.country, o.shipping_address.phone].filter(Boolean).join(", ")}</p>}
+                {canPayOnline(o) && <div className="mt-2"><PayOnlineButton orderId={o.id} sandbox={Boolean(paystack?.sandbox)} /></div>}
                 <OrderActions id={o.id} role={role} status={o.status} method={o.delivery_method} />
                 {role === "buyer" && ["delivered", "completed"].includes(o.status) && !reviewed.has(o.id) && <ReviewForm sellerId={o.seller_id} orderId={o.id} />}
               </Card>

@@ -20,7 +20,7 @@ export async function Header() {
   }
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-2 px-4">
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-1 px-3 sm:gap-2 sm:px-4">
         <Logo />
         <form action="/recherche" role="search" className="mx-2 hidden flex-1 md:flex">
           <label className="sr-only" htmlFor="hq">{t("common.search")}</label>

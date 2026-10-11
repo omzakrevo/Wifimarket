@@ -1,0 +1,21 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Le runtime Next.js de Netlify est installé automatiquement.
+# Redirections vers le domaine principal (apex en HTTPS). Adapter si vous préférez « www » comme domaine canonique.
+[[redirects]]
+  from = "https://www.wifimarket.tech/*"
+  to = "https://wifimarket.tech/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://wifimarket.tech/*"
+  to = "https://wifimarket.tech/:splat"
+  status = 301
+  force = true

@@ -552,3 +552,5 @@ admin.parent | Parent | Parent
 admin.top_level | (Niveau principal) | (Top level)
 admin.all_countries | Tous pays | All countries
 admin.grant_role | Attribuer | Grant
+order.pay_online | Payer en ligne | Pay online
+order.pay_error | Le paiement en ligne n'est pas disponible pour cette commande. | Online payment is not available for this order.

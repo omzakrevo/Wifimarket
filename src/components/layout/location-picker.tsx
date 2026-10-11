@@ -25,9 +25,9 @@ export function LocationPicker({ countries, cities, current }: Props) {
   return (
     <div className="relative">
       <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open}
-        className="inline-flex h-10 max-w-44 items-center gap-1 rounded-lg px-2 text-sm hover:bg-brand-soft/60">
+        className="inline-flex h-10 max-w-44 items-center gap-1 rounded-lg px-2 text-sm hover:bg-brand-soft/60" aria-label={label} title={label}>
         <MapPin size={16} className="shrink-0 text-brand" />
-        <span className="truncate">{label}</span>
+        <span className="hidden truncate sm:inline">{label}</span>
       </button>
       {open && (
         <div className="absolute right-0 z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-card p-4 shadow-lg">
