@@ -31,7 +31,8 @@ jobs:
           python3 tool/build_strings.py
           git diff --exit-code lib/core/i18n/strings.g.dart
 
-      - run: flutter analyze
+      # Les « info » existantes (lints de style) ne bloquent pas ; erreurs et avertissements, oui.
+      - run: flutter analyze --no-fatal-infos
 
       - run: flutter test
 

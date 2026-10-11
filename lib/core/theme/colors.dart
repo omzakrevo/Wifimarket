@@ -14,8 +14,8 @@ class WM {
   static const wave = Color(0xFF1E48D6);
   static const volt = Color(0xFFFFD43B);
   static const coral = Color(0xFFE5484D);
-  static const mint = Color(0xFFE4ECFF)
-  static const success = Color(0xFF12915B);;
+  static const mint = Color(0xFFE4ECFF);
+  static const success = Color(0xFF12915B);
 
   static const paper = Color(0xFFEEF3FF);
   static const line = Color(0xFFDDE5F5);

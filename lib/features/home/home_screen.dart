@@ -167,8 +167,6 @@ class _Hero extends ConsumerWidget {
                             ? CrossAxisAlignment.center
                             : CrossAxisAlignment.start,
                         children: [
-                          if (!wide) const _MobileTop(),
-                          SizedBox(height: wide ? 0 : 22),
                           Text(
                                 context.t('home.hero_title'),
                                 textAlign: wide
