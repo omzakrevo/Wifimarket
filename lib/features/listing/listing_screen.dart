@@ -99,13 +99,13 @@ class _Gallery extends ConsumerWidget {
           child: Container(
             width: 42,
             height: 42,
-            decoration: BoxDecoration(color: Colors.black.withValues(alpha: .38), shape: BoxShape.circle),
-            child: Icon(i, color: Colors.white, size: 22),
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: .92), shape: BoxShape.circle, boxShadow: WM.softShadow(.15)),
+            child: Icon(i, color: WM.ink, size: 22),
           ),
         );
     return Column(children: [
       ClipRRect(
-        borderRadius: BorderRadius.circular(wide ? 24 : 0),
+        borderRadius: wide ? BorderRadius.circular(28) : const BorderRadius.vertical(bottom: Radius.circular(32)),
         child: AspectRatio(
           aspectRatio: wide ? 1.1 : 1.0,
           child: Stack(fit: StackFit.expand, children: [
