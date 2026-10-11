@@ -419,6 +419,7 @@ class _MobileHero extends ConsumerWidget {
                   decoration: InputDecoration(
                     hintText: context.t('home.search_placeholder'),
                     prefixIcon: const Icon(Icons.search_rounded),
+                    filled: false,
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
