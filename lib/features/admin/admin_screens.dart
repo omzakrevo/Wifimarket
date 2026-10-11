@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
 import '../../core/i18n/i18n.dart';
 import '../../core/theme/colors.dart';
@@ -9,6 +11,7 @@ import '../../data/providers.dart';
 import '../../data/repo.dart';
 import '../../widgets/common.dart';
 import '../../widgets/motion.dart';
+import 'demo_sql.dart';
 
 class _Section {
   const _Section(this.id, this.icon, this.labelKey);
@@ -815,7 +818,7 @@ class _DemoAdmin extends StatefulWidget {
 
 class _DemoAdminState extends State<_DemoAdmin> {
   late Future<Map<String, dynamic>> f = _load();
-  bool busy = false;
+  bool busy = false, needsSetup = false;
 
   Future<Map<String, dynamic>> _load() async => Map<String, dynamic>.from(await sb.rpc('demo_data_counts') as Map);
 
@@ -823,10 +826,25 @@ class _DemoAdminState extends State<_DemoAdmin> {
     if (!await confirmDialog(context, context.t('admin.demo_confirm'), ok: context.t('admin.demo_purge'))) return;
     if (!mounted) return;
     setState(() => busy = true);
-    await guard(context, () async {
+    try {
       await sb.rpc('purge_demo_data');
-      if (mounted) setState(() => f = _load());
-    }, ok: 'admin.demo_done');
+      if (mounted) {
+        setState(() {
+          needsSetup = false;
+          f = _load();
+        });
+        toast(context, context.t('admin.demo_done'));
+      }
+    } catch (e) {
+      final missing = e is PostgrestException && (e.code == 'PGRST202' || e.message.contains('Could not find the function'));
+      if (mounted) {
+        if (missing) {
+          setState(() => needsSetup = true);
+        } else {
+          toast(context, errMsg(context, e), error: true);
+        }
+      }
+    }
     if (mounted) setState(() => busy = false);
   }
 
@@ -860,6 +878,28 @@ class _DemoAdminState extends State<_DemoAdmin> {
             stat(context.t('admin.orders'), 'orders'),
           ]),
           const SizedBox(height: 20),
+          if (needsSetup) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: WM.volt.withValues(alpha: .16), borderRadius: BorderRadius.circular(16)),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(context.t('admin.demo_setup_title'), style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 6),
+                Text(context.t('admin.demo_setup_body'), style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    await Clipboard.setData(const ClipboardData(text: kDemoPurgeSql));
+                    if (context.mounted) toast(context, context.t('admin.demo_sql_copied'));
+                  },
+                  icon: const Icon(Icons.copy_rounded),
+                  label: Text(context.t('admin.demo_copy_sql')),
+                ),
+              ]),
+            ),
+            const SizedBox(height: 14),
+          ],
           if (total == 0)
             Text(context.t('admin.demo_none'), style: Theme.of(context).textTheme.titleSmall)
           else

@@ -10,6 +10,7 @@ import '../../data/models.dart';
 import '../../data/providers.dart';
 import '../../widgets/common.dart';
 import '../../widgets/motion.dart';
+import '../shops/shop_share.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -743,7 +744,19 @@ class ShopTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Avatar(url: shop.logoUrl, name: shop.name, size: 44),
+            Row(
+              children: [
+                Avatar(url: shop.logoUrl, name: shop.name, size: 44),
+                const Spacer(),
+                Pressable(
+                  onTap: () => shareShop(context, shop),
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Icon(Icons.ios_share_rounded, size: 20, color: cs.primary),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 10),
             Row(
               children: [
