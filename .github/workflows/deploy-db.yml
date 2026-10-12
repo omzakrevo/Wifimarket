@@ -1,0 +1,56 @@
+name: Déploiement base de données
+
+# Applique automatiquement sur le serveur Supabase les nouvelles migrations de supabase/migrations/.
+# Nécessite 3 secrets GitHub (voir docs/DEPLOIEMENT_AUTO.md) : VPS_HOST, VPS_SSH_KEY, VPS_KNOWN_HOSTS.
+on:
+  push:
+    branches: [main, master]
+    paths: ['supabase/migrations/**', 'deploy/vps/migrate.sh']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-db
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    name: Appliquer les migrations
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vérifier les secrets
+        id: check
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          KEY: ${{ secrets.VPS_SSH_KEY }}
+          KNOWN: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          if [ -z "$HOST" ] || [ -z "$KEY" ] || [ -z "$KNOWN" ]; then
+            echo "Secrets VPS_HOST / VPS_SSH_KEY / VPS_KNOWN_HOSTS absents : déploiement ignoré."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Préparer SSH
+        if: steps.check.outputs.ready == 'true'
+        env:
+          KEY: ${{ secrets.VPS_SSH_KEY }}
+          KNOWN: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
+
+      # La clé est limitée côté serveur à l'exécution de migrate.sh : l'archive passe par l'entrée standard.
+      - name: Envoyer et appliquer les migrations
+        if: steps.check.outputs.ready == 'true'
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          tar c -C supabase migrations | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o BatchMode=yes "deploy@$HOST"
