@@ -52,3 +52,40 @@ Onglet **Actions** → « Déploiement base de données » → *Run workflow*.
 3. Pour revenir en arrière, écrivez une **nouvelle** migration qui corrige (ne modifiez jamais une migration déjà appliquée).
 
 Le suivi est dans la table `wm_deploy.schema_migrations` (non exposée par l'API).
+
+---
+
+# Publication automatique du site web sur LWS
+
+À chaque modification fusionnée sur `main`, GitHub compile le site et l'envoie sur votre hébergement LWS par FTP sécurisé (FTPS).
+Seuls les fichiers modifiés sont renvoyés après le premier envoi (le premier est plus long : environ 40 Mo).
+
+## Installation (une seule fois)
+
+### 1. Chez LWS : créer un compte FTP dédié
+Dans votre espace client LWS → votre hébergement → **FTP** (ou « Comptes FTP ») :
+- créez un compte FTP **réservé au site** (par exemple `deploy-github`), limité au dossier du site si possible ;
+- notez l'**adresse du serveur FTP** (souvent `ftp.wifimarket.tech` ou une adresse du type `ftp.cluster0XX.hosting.lws.fr`), le nom d'utilisateur et le mot de passe ;
+- repérez le **dossier du site** : sur les hébergements mutualisés LWS, c'est en général `/htdocs/`.
+
+### 2. Dans GitHub : Settings → Secrets and variables → Actions
+Secrets (onglet *Secrets*, environnement **production**) :
+| Nom | Valeur |
+|---|---|
+| `FTP_HOST` | l'adresse du serveur FTP |
+| `FTP_USER` | le nom d'utilisateur FTP |
+| `FTP_PASSWORD` | le mot de passe FTP |
+
+Variables (onglet *Variables*, facultatives) :
+| Nom | Valeur par défaut | Quand la changer |
+|---|---|---|
+| `FTP_DIR` | `/htdocs/` | si le site est dans un autre dossier |
+| `FTP_PROTOCOL` | `ftps` | mettre `ftp` seulement si LWS refuse le FTPS (déconseillé : mot de passe en clair) |
+
+### 3. Tester
+Onglet **Actions** → « Déploiement site web (LWS) » → *Run workflow*. Ouvrez ensuite `https://wifimarket.tech`.
+
+## À savoir
+- Le fichier `.htaccess` du dossier `web/` est envoyé avec le site : il redirige toutes les adresses vers `index.html` (nécessaire pour les liens de boutiques et d'annonces).
+- Ne mettez jamais le mot de passe FTP dans le dépôt ni dans une conversation : uniquement dans les secrets GitHub.
+- Le déploiement du site (`deploy-web`) et celui de la base (`deploy-db`) sont indépendants.
