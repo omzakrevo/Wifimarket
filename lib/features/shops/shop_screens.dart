@@ -12,6 +12,7 @@ import '../../data/repo.dart';
 import '../../widgets/common.dart';
 import '../../widgets/motion.dart';
 import '../home/home_screen.dart';
+import 'shop_share.dart';
 
 final _allShopsProvider = FutureProvider.autoDispose<List<Shop>>((ref) => Repo.shops(limit: 60));
 
@@ -67,6 +68,7 @@ class ShopScreen extends ConsumerWidget {
         final cs = Theme.of(context).colorScheme;
         return WPage(
           title: s.name,
+          actions: [IconButton(tooltip: context.t('shop.share'), icon: const Icon(Icons.ios_share_rounded), onPressed: () => shareShop(context, s))],
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             SizedBox(
@@ -85,6 +87,8 @@ class ShopScreen extends ConsumerWidget {
             ]),
             Text([s.city, s.country].whereType<String>().join(' · '), style: Theme.of(context).textTheme.bodySmall),
             if ((s.description ?? '').isNotEmpty) Padding(padding: const EdgeInsets.only(top: 10), child: Text(s.description!)),
+            const SizedBox(height: 12),
+            ShopLinkCard(s),
             SectionHeader(context.t('shop.catalog')),
             AsyncView<List<Listing>>(value: listings, loading: const SkeletonGrid(), data: (l) => l.isEmpty ? EmptyState(icon: Icons.inventory_2_outlined, title: context.t('common.no_results')) : ListingGrid(l)),
           ]),
@@ -285,6 +289,8 @@ class _ManageShop extends ConsumerWidget {
         ])),
         OutlinedButton(onPressed: () => context.push('/shop/${shop.slug}'), child: Text(context.t('shop.view_public'))),
       ]).reveal(),
+      const SizedBox(height: 12),
+      ShopLinkCard(shop).reveal(index: 1),
       const SizedBox(height: 16),
       Row(children: [
         stat(context.t('shop.stat_listings'), stats?['listings_active']),

@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:wifimarket/features/admin/demo_sql.dart';
 import 'package:wifimarket/core/i18n/i18n.dart';
 import 'package:wifimarket/core/utils/format.dart';
 import 'package:wifimarket/data/models.dart';
+import 'package:wifimarket/features/auth/auth_screen.dart';
 
 void main() {
   group('i18n', () {
@@ -10,6 +14,20 @@ void main() {
       expect(translate('en', 'nav.home'), 'Home');
       expect(translate('fr', 'err.inconnue'), translate('fr', 'err.generic'));
       expect(translate('fr', 'search.count', {'n': 3}), contains('3'));
+    });
+  });
+
+  group('données de test', () {
+    test('le SQL copiable est identique à la migration 0011', () {
+      expect(kDemoPurgeSql, File('supabase/migrations/0011_purge_demo.sql').readAsStringSync());
+    });
+  });
+
+  group('téléphone', () {
+    test('normalizePhone met le numéro au format international', () {
+      expect(normalizePhone('+226 70 00 00 00'), '+22670000000');
+      expect(normalizePhone('0022670-00-00-00'), '+22670000000');
+      expect(normalizePhone('(+226)70.00.00.00'), '+22670000000');
     });
   });
 

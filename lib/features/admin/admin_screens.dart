@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
 import '../../core/i18n/i18n.dart';
 import '../../core/theme/colors.dart';
@@ -9,6 +11,7 @@ import '../../data/providers.dart';
 import '../../data/repo.dart';
 import '../../widgets/common.dart';
 import '../../widgets/motion.dart';
+import 'demo_sql.dart';
 
 class _Section {
   const _Section(this.id, this.icon, this.labelKey);
@@ -36,6 +39,7 @@ const _sections = [
   _Section('keywords', Icons.block_rounded, 'admin.keywords'),
   _Section('audit', Icons.history_rounded, 'admin.audit'),
   _Section('deletions', Icons.person_remove_outlined, 'admin.deletions'),
+  _Section('demo', Icons.science_outlined, 'admin.demo'),
 ];
 
 class AdminScreen extends ConsumerWidget {
@@ -51,12 +55,14 @@ class AdminScreen extends ConsumerWidget {
         if (r.isEmpty) return WPage(title: context.t('admin.title'), child: EmptyState(icon: Icons.lock_outline_rounded, title: context.t('err.not_allowed')));
         final isSuper = r.contains('superadmin');
         final cur = section ?? 'dashboard';
+        // La section « Données de test » est réservée aux superadmins.
+        final sections = _sections.where((s) => s.id != 'demo' || isSuper).toList();
         final body = _body(cur, isSuper);
         final nav = isWide(context)
             ? SizedBox(
                 width: 230,
                 child: Column(children: [
-                  for (final s in _sections)
+                  for (final s in sections)
                     ListTile(
                       dense: true,
                       selected: s.id == cur,
@@ -80,7 +86,7 @@ class AdminScreen extends ConsumerWidget {
                   SizedBox(
                     height: 46,
                     child: ListView(scrollDirection: Axis.horizontal, children: [
-                      for (final s in _sections)
+                      for (final s in sections)
                         Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(avatar: Icon(s.icon, size: 16), label: Text(context.t(s.labelKey)), selected: s.id == cur, onSelected: (_) => context.go('/admin/${s.id}'))),
                     ]),
                   ),
@@ -130,6 +136,8 @@ class AdminScreen extends ConsumerWidget {
         return _AuditAdmin(key: ValueKey(id));
       case 'deletions':
         return _DeletionsAdmin(key: ValueKey(id));
+      case 'demo':
+        return isSuper ? _DemoAdmin(key: ValueKey(id)) : const SizedBox.shrink();
       default:
         return const _Dashboard();
     }
@@ -798,4 +806,111 @@ class _DeletionsAdmin extends StatelessWidget {
             ),
         ]),
       );
+}
+
+// ---------- données de test
+
+class _DemoAdmin extends StatefulWidget {
+  const _DemoAdmin({super.key});
+  @override
+  State<_DemoAdmin> createState() => _DemoAdminState();
+}
+
+class _DemoAdminState extends State<_DemoAdmin> {
+  late Future<Map<String, dynamic>> f = _load();
+  bool busy = false, needsSetup = false;
+
+  Future<Map<String, dynamic>> _load() async => Map<String, dynamic>.from(await sb.rpc('demo_data_counts') as Map);
+
+  Future<void> _purge() async {
+    if (!await confirmDialog(context, context.t('admin.demo_confirm'), ok: context.t('admin.demo_purge'))) return;
+    if (!mounted) return;
+    setState(() => busy = true);
+    try {
+      await sb.rpc('purge_demo_data');
+      if (mounted) {
+        setState(() {
+          needsSetup = false;
+          f = _load();
+        });
+        toast(context, context.t('admin.demo_done'));
+      }
+    } catch (e) {
+      final missing = e is PostgrestException && (e.code == 'PGRST202' || e.message.contains('Could not find the function'));
+      if (mounted) {
+        if (missing) {
+          setState(() => needsSetup = true);
+        } else {
+          toast(context, errMsg(context, e), error: true);
+        }
+      }
+    }
+    if (mounted) setState(() => busy = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return FutureBuilder<Map<String, dynamic>>(
+      future: f,
+      builder: (context, s) {
+        if (s.hasError) return ErrorState(error: s.error!, onRetry: () => setState(() => f = _load()));
+        if (!s.hasData) return const SkeletonList(count: 2);
+        final d = s.data!;
+        final total = d.values.fold<int>(0, (a, b) => a + (b as num).toInt());
+        Widget stat(String label, String key) => Container(
+              width: 150,
+              padding: const EdgeInsets.all(14),
+              decoration: softCard(cs),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                AnimatedCount(value: (d[key] as num?) ?? 0, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
+                Text(label, style: Theme.of(context).textTheme.bodySmall),
+              ]),
+            );
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(context.t('admin.demo_sub'), style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 14),
+          Wrap(spacing: 12, runSpacing: 12, children: [
+            stat(context.t('admin.users'), 'users'),
+            stat(context.t('nav.shops'), 'shops'),
+            stat(context.t('admin.listings'), 'listings'),
+            stat(context.t('nav.wanted'), 'wanted'),
+            stat(context.t('admin.orders'), 'orders'),
+          ]),
+          const SizedBox(height: 20),
+          if (needsSetup) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: WM.volt.withValues(alpha: .16), borderRadius: BorderRadius.circular(16)),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(context.t('admin.demo_setup_title'), style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 6),
+                Text(context.t('admin.demo_setup_body'), style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    await Clipboard.setData(const ClipboardData(text: kDemoPurgeSql));
+                    if (context.mounted) toast(context, context.t('admin.demo_sql_copied'));
+                  },
+                  icon: const Icon(Icons.copy_rounded),
+                  label: Text(context.t('admin.demo_copy_sql')),
+                ),
+              ]),
+            ),
+            const SizedBox(height: 14),
+          ],
+          if (total == 0)
+            Text(context.t('admin.demo_none'), style: Theme.of(context).textTheme.titleSmall)
+          else
+            FilledButton.icon(
+              style: FilledButton.styleFrom(backgroundColor: WM.coral, foregroundColor: Colors.white),
+              onPressed: busy ? null : _purge,
+              icon: const Icon(Icons.delete_forever_rounded),
+              label: Text(context.t('admin.demo_purge')),
+            ),
+        ]);
+      },
+    );
+  }
 }

@@ -1,0 +1,62 @@
+name: Android
+
+# Compile l'application Android (APK) et la publie comme artefact téléchargeable dans l'onglet « Actions ».
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master, 'claude/**']
+  pull_request:
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    name: APK Android (release)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - run: python3 tool/build_strings.py
+
+      # Signé avec la clé de debug (installable directement). Pour le Play Store, ajouter une clé de publication.
+      - name: Build APK
+        run: flutter build apk --release --target-platform android-arm,android-arm64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wifimarket-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      # Lien de téléchargement direct (page « Releases » du dépôt), plus simple que l'artefact, notamment depuis un téléphone.
+      - name: Publier l'APK dans les Releases
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk wifimarket.apk
+          gh release delete android-latest --yes --cleanup-tag || true
+          gh release create android-latest wifimarket.apk \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "WiFiMarket Android (dernière version)" \
+            --notes "APK de la dernière compilation (commit $GITHUB_SHA), signé avec la clé de debug. Autorisez les sources inconnues pour l'installer."

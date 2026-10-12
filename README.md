@@ -1,7 +1,7 @@
 # WiFiMarket — application Flutter (web + Android + iOS)
 
 Marketplace du matériel Wi-Fi et réseau en Afrique de l'Ouest (FR/EN). Une seule base de code Flutter produit
-le **site web** (statique) et les **applications mobiles**. Le backend est le projet Supabase **wifimarket**
+le **site web** (statique) et les **applications mobiles**. Le backend est un Supabase **auto-hébergé** (VPS OVH, `https://vps-ef39f3a3.vps.ovh.ca`)
 (Postgres + RLS, Auth, Storage, Realtime).
 
 > L'ancienne version Next.js est conservée sur la branche `legacy-nextjs`.
@@ -35,7 +35,7 @@ Configuration (valeurs par défaut = projet Supabase `wifimarket`, clé **publiq
 flutter run --dart-define=SUPABASE_URL=https://xxxx.supabase.co \
             --dart-define=SUPABASE_ANON_KEY=sb_publishable_... \
             --dart-define=SITE_URL=https://wifimarket.tech \
-            --dart-define=AUTH_GOOGLE=true --dart-define=AUTH_PHONE=true   # si activés dans Supabase Auth
+            --dart-define=AUTH_GOOGLE=true --dart-define=AUTH_PHONE=true   # si activés dans Supabase Auth (téléphone : fournisseur SMS requis)
 ```
 
 La clé `service_role` ne doit **jamais** figurer dans l'application.
@@ -47,8 +47,23 @@ Utilisation : `context.t('clé')`.
 
 ## Base de données
 
-`supabase/migrations/0001…0010` + `supabase/seed_demo.sql` (données de démonstration, à supprimer avant le lancement réel).
+`supabase/migrations/0001…0011` + `supabase/seed_demo.sql` (données de démonstration, à supprimer avant le lancement réel).
 La migration `0009_gdpr.sql` (fonction `anonymize_user`) est à exécuter manuellement dans le SQL editor si elle n'est pas appliquée.
+### Devenir administrateur
+
+Créez votre compte sur le site, puis exécutez dans le SQL editor de Supabase (remplacez l'e-mail) :
+
+```sql
+insert into public.user_roles (user_id, role)
+select id, 'superadmin' from auth.users where email = 'vous@exemple.com';
+```
+
+Le menu **Administration** apparaît alors dans l'application.
+
+### Supprimer les données de test
+
+La migration `0011_purge_demo.sql` ajoute le bouton **Administration → Données de test → Supprimer les données de test** (superadmin réel uniquement). Il supprime les comptes `@demo.wifimarket.test` et tout ce qui leur est lié (annonces, boutiques, demandes, conversations, commandes, tarif « DEMO »). Les données réelles ne sont pas touchées ; un compte de démonstration ne peut pas lancer la suppression.
+
 Réglages Supabase Auth à faire : *Site URL* = votre domaine, *Redirect URLs* = `https://votre-domaine/**`.
 
 ## Compilation

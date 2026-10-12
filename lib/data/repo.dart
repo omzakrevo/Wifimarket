@@ -20,6 +20,8 @@ String errorKey(Object e) {
   if (e is AuthException) {
     final l = msg.toLowerCase();
     if (l.contains('invalid login')) return 'auth.err.invalid_credentials';
+    if (l.contains('phone') && (l.contains('provider') || l.contains('unsupported') || l.contains('disabled'))) return 'auth.err.phone_disabled';
+    if (l.contains('token') && (l.contains('expired') || l.contains('invalid'))) return 'auth.err.otp_invalid';
     if (l.contains('not confirmed')) return 'auth.err.email_not_confirmed';
     if (l.contains('already')) return 'auth.err.already_registered';
     if (l.contains('rate') || l.contains('seconds')) return 'auth.err.rate_limit';
