@@ -5,7 +5,7 @@
 
 [build.environment]
   # Clé PUBLIQUE Supabase uniquement. Ne jamais mettre la clé service_role ici.
-  SUPABASE_URL = "https://gsukmkijatkmiopwwieg.supabase.co"
+  SUPABASE_URL = "https://vps-ef39f3a3.vps.ovh.ca"
   SITE_URL = "https://wifimarket.tech"
 
 [[redirects]]

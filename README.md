@@ -1,7 +1,7 @@
 # WiFiMarket — application Flutter (web + Android + iOS)
 
 Marketplace du matériel Wi-Fi et réseau en Afrique de l'Ouest (FR/EN). Une seule base de code Flutter produit
-le **site web** (statique) et les **applications mobiles**. Le backend est le projet Supabase **wifimarket**
+le **site web** (statique) et les **applications mobiles**. Le backend est un Supabase **auto-hébergé** (VPS OVH, `https://vps-ef39f3a3.vps.ovh.ca`)
 (Postgres + RLS, Auth, Storage, Realtime).
 
 > L'ancienne version Next.js est conservée sur la branche `legacy-nextjs`.
@@ -35,7 +35,7 @@ Configuration (valeurs par défaut = projet Supabase `wifimarket`, clé **publiq
 flutter run --dart-define=SUPABASE_URL=https://xxxx.supabase.co \
             --dart-define=SUPABASE_ANON_KEY=sb_publishable_... \
             --dart-define=SITE_URL=https://wifimarket.tech \
-            --dart-define=AUTH_GOOGLE=true --dart-define=AUTH_PHONE=true   # si activés dans Supabase Auth
+            --dart-define=AUTH_GOOGLE=true --dart-define=AUTH_PHONE=true   # si activés dans Supabase Auth (téléphone : fournisseur SMS requis)
 ```
 
 La clé `service_role` ne doit **jamais** figurer dans l'application.
