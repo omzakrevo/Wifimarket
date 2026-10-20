@@ -1,0 +1,125 @@
+name: ZoneHub — APK, iOS et site web
+
+# Compile ZoneHub à chaque push sur la branche « zonehub » et publie les fichiers
+# dans la page Releases du dépôt (tag « zonehub-latest »).
+on:
+  push:
+    branches: [zonehub]
+  workflow_dispatch:
+
+concurrency:
+  group: zonehub-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Analyse et tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  android:
+    name: APK Android
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      # Signé avec la clé de debug : installable directement (sources inconnues).
+      - run: flutter build apk --release
+      - run: cp build/app/outputs/flutter-apk/app-release.apk zonehub.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zonehub-apk
+          path: zonehub.apk
+          retention-days: 30
+
+  ios:
+    name: iOS (IPA non signée)
+    needs: test
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      # Sans compte Apple Developer, l'IPA n'est pas signée : il faut la signer
+      # (Xcode, AltStore, Sideloadly…) avant de l'installer sur un iPhone/iPad.
+      - run: flutter build ios --release --no-codesign
+      - name: Empaqueter l'IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qr zonehub-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zonehub-ios
+          path: zonehub-unsigned.ipa
+          retention-days: 30
+
+  web:
+    name: Site web
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter build web --release --no-web-resources-cdn
+      - run: cd build/web && zip -qr ../../zonehub-web.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zonehub-web
+          path: zonehub-web.zip
+          retention-days: 30
+
+  release:
+    name: Publier dans Releases
+    needs: [android, ios, web]
+    if: always() && needs.android.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Release zonehub-latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          ls -la dist
+          gh release delete zonehub-latest --yes --cleanup-tag || true
+          gh release create zonehub-latest dist/* \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "ZoneHub (dernière version)" \
+            --notes "Compilation automatique du commit $GITHUB_SHA.
+          - zonehub.apk : Android, signé avec la clé de debug (autoriser les sources inconnues).
+          - zonehub-unsigned.ipa : iOS non signée, à signer avant installation.
+          - zonehub-web.zip : site web à copier sur l'hébergement (dossier racine)."
