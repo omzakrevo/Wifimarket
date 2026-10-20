@@ -87,6 +87,7 @@ class AccountScreen extends ConsumerWidget {
             ),
         ]),
         const SizedBox(height: 18),
+        tile(Icons.chat_bubble_outline_rounded, context.t('nav.messages'), '/messages', idx: 3),
         tile(Icons.sell_outlined, context.t('account.my_listings'), '/account/listings', idx: 3),
         tile(Icons.favorite_border_rounded, context.t('account.favorites'), '/favorites', idx: 4),
         tile(Icons.shopping_bag_outlined, context.t('cart.title'), '/cart', idx: 5),

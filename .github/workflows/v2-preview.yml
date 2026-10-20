@@ -1,0 +1,129 @@
+name: WiFiMarket v2 (design ZoneHub) — aperçu APK, iOS, web
+
+# Compile la nouvelle version (design ZoneHub, même base Supabase) à chaque push sur « zonehub-v2 »
+# et publie les fichiers dans Releases (tag « v2-preview »). Ne touche pas au site en production.
+on:
+  push:
+    branches: [zonehub-v2]
+  workflow_dispatch:
+
+concurrency:
+  group: v2-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Analyse et tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: python3 tool/build_strings.py
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
+
+  android:
+    name: APK Android
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: python3 tool/build_strings.py
+      # Signé avec la clé de debug : installable directement (sources inconnues).
+      - run: flutter build apk --release --target-platform android-arm,android-arm64
+      - run: cp build/app/outputs/flutter-apk/app-release.apk wifimarket-v2.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v2-apk
+          path: wifimarket-v2.apk
+          retention-days: 30
+
+  ios:
+    name: iOS (IPA non signée)
+    needs: test
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: python3 tool/build_strings.py
+      # Sans compte Apple Developer, l'IPA n'est pas signée : il faut la signer
+      # (Xcode, AltStore, Sideloadly…) avant de l'installer sur un iPhone/iPad.
+      - run: flutter build ios --release --no-codesign
+      - name: Empaqueter l'IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qr wifimarket-v2-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v2-ios
+          path: wifimarket-v2-unsigned.ipa
+          retention-days: 30
+
+  web:
+    name: Site web
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: python3 tool/build_strings.py
+      - run: bash tool/build_web.sh
+      - run: cd build/web && zip -qr ../../wifimarket-v2-web.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v2-web
+          path: wifimarket-v2-web.zip
+          retention-days: 30
+
+  release:
+    name: Publier dans Releases
+    needs: [android, ios, web]
+    if: always() && needs.android.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Release v2-preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          ls -la dist
+          gh release delete v2-preview --yes --cleanup-tag || true
+          gh release create v2-preview dist/* \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "WiFiMarket v2 — aperçu (design ZoneHub)" \
+            --notes "Compilation automatique du commit $GITHUB_SHA.
+          - wifimarket-v2.apk : Android, signé avec la clé de debug (autoriser les sources inconnues).
+          - wifimarket-v2-unsigned.ipa : iOS non signée, à signer avant installation.
+          - wifimarket-v2-web.zip : site web à copier sur l'hébergement (dossier racine)."

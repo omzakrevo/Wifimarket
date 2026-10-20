@@ -582,3 +582,37 @@ admin.all_countries | Tous pays | All countries
 admin.grant_role | Attribuer | Grant
 order.pay_online | Payer en ligne | Pay online
 order.pay_error | Le paiement en ligne n'est pas disponible pour cette commande. | Online payment is not available for this order.
+# ---------- ZoneHub (nouveau design)
+zh.tagline | WIFI ZONE. CONNECTÉE. | WIFI ZONE. CONNECTED.
+zh.welcome | Bienvenue | Welcome
+zh.pick_country | Choisissez votre pays. Un compte visiteur est créé pour ce pays : vous voyez les boutiques, les prix et les annonces d'occasion locales. | Choose your country. A visitor account is created for it: you see local shops, prices and used listings.
+zh.all_countries | Tous les pays | All countries
+zh.existing_account | compte existant | existing account
+zh.change_country | Changer de pays | Change country
+zh.visitor | Visiteur {id} | Visitor {id}
+zh.b1_tag | NOUVEAUTÉS | NEW ARRIVALS
+zh.b1_title | WIFI ZONE. | WIFI ZONE.
+zh.b1_high | PLUS LOIN, PLUS FORT. | FURTHER, STRONGER.
+zh.b1_text | Routeurs hotspot, antennes et kits point-à-point pour lancer votre zone. | Hotspot routers, antennas and point-to-point kits to launch your zone.
+zh.b1_cta | ACHETER | SHOP NOW
+zh.b2_tag | STARLINK | STARLINK
+zh.b2_title | CONNECTEZ | CONNECT
+zh.b2_high | MÊME EN BROUSSE. | EVEN OFF-GRID.
+zh.b2_text | Kits Starlink, supports et énergie solaire livrés dans votre ville. | Starlink kits, mounts and solar power delivered to your city.
+zh.b2_cta | DÉCOUVRIR | DISCOVER
+zh.b3_tag | OCCASION | USED
+zh.b3_title | VENDEZ VOTRE | SELL YOUR
+zh.b3_high | MATÉRIEL USAGÉ. | USED GEAR.
+zh.b3_text | Publiez une annonce gratuite en 1 minute et touchez tout votre pays. | Post a free listing in 1 minute and reach your whole country.
+zh.b3_cta | PUBLIER | POST
+zh.trending | Matériel tendance | Trending gear
+zh.new_shops | Neuf en boutique | New in shops
+zh.used_near | Occasion près de vous | Used near you
+zh.offer_tag | SECONDE MAIN | SECOND HAND
+zh.offer_title | VENDEZ & ACHETEZ D'OCCASION | BUY & SELL USED
+zh.offer_cta | VOIR LES ANNONCES | SEE LISTINGS
+zh.offer_badge | -40 % | -40%
+zh.categories | Catégories | Categories
+zh.used | Occasion | Used
+zh.post_listing | Publier une annonce | Post a listing
+zh.products | {n} annonces | {n} listings

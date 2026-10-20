@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,8 +10,9 @@ import '../data/providers.dart';
 import 'orders/cart_screens.dart';
 import '../widgets/common.dart';
 import '../widgets/motion.dart';
+import 'home/zone_home.dart';
 
-const _tabRoots = ['/', '/search', '/messages', '/account'];
+const _tabRoots = ['/', '/categories', '/shops', '/used', '/account'];
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.location, required this.child});
@@ -24,6 +24,8 @@ class AppShell extends ConsumerWidget {
     final wide = isWide(context);
     final cs = Theme.of(context).colorScheme;
     final showBottom = !wide && _tabRoots.contains(location);
+    final chosen = ref.watch(countryChosenProvider);
+    if (chosen == false) return const CountryPickerScreen(firstRun: true);
     return Scaffold(
       body: Stack(children: [
         Column(children: [
@@ -119,27 +121,31 @@ class _BottomBar extends ConsumerWidget {
         top: false,
         child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
           item(Icons.home_outlined, Icons.home_rounded, context.t('nav.home'), '/', 0),
-          item(Icons.search_rounded, Icons.search_rounded, context.t('common.search'), '/search', 1),
+          item(Icons.grid_view_outlined, Icons.grid_view_rounded, context.t('zh.categories'), '/categories', 1),
           Expanded(
             child: Pressable(
-              onTap: () => context.push('/sell'),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 6, top: 4),
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Container(
-                    width: 52,
-                    height: 40,
-                    decoration: BoxDecoration(gradient: WM.signalGradient, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: WM.wave.withValues(alpha: .35), blurRadius: 14, offset: const Offset(0, 6))]),
-                    child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
-                  ).animate(onPlay: (c) => c.repeat(reverse: true)).scaleXY(begin: 1, end: 1.06, duration: 1600.ms, curve: Curves.easeInOut),
-                  const SizedBox(height: 2),
-                  Text(context.t('nav.sell_short'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: cs.onSurfaceVariant)),
-                ]),
+              onTap: () => context.go('/shops'),
+              child: Transform.translate(
+                offset: const Offset(0, -10),
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: WM.signalGradient,
+                    border: Border.all(color: cs.surfaceContainer, width: 4),
+                    boxShadow: [BoxShadow(color: WM.wave.withValues(alpha: .35), blurRadius: 14, offset: const Offset(0, 6))],
+                  ),
+                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Icon(idx == 2 ? Icons.storefront : Icons.storefront_outlined, color: Colors.white, size: 22),
+                    Text(context.t('nav.shops'), style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
+                  ]),
+                ),
               ),
             ),
           ),
-          item(Icons.chat_bubble_outline_rounded, Icons.chat_bubble_rounded, context.t('nav.messages'), '/messages', 2, badge: unread),
-          item(Icons.person_outline_rounded, Icons.person_rounded, context.t('nav.account'), '/account', 3),
+          item(Icons.sell_outlined, Icons.sell, context.t('zh.used'), '/used', 3),
+          item(Icons.person_outline_rounded, Icons.person_rounded, context.t('nav.account'), '/account', 4, badge: unread),
         ]),
       ),
     );
@@ -217,14 +223,18 @@ class _TopBarState extends ConsumerState<_TopBar> {
                   icon: const Icon(Icons.menu_rounded),
                   onSelected: (to) => context.go(to),
                   itemBuilder: (_) => [
-                    PopupMenuItem(value: '/wanted', child: Text(context.t('nav.wanted'))),
+                    PopupMenuItem(value: '/categories', child: Text(context.t('zh.categories'))),
                     PopupMenuItem(value: '/shops', child: Text(context.t('nav.shops'))),
+                    PopupMenuItem(value: '/used', child: Text(context.t('zh.used'))),
+                    PopupMenuItem(value: '/wanted', child: Text(context.t('nav.wanted'))),
                   ],
                 ),
                 const Spacer(),
               ] else ...[
-                link(context.t('nav.wanted'), '/wanted'),
+                link(context.t('zh.categories'), '/categories'),
                 link(context.t('nav.shops'), '/shops'),
+                link(context.t('zh.used'), '/used'),
+                link(context.t('nav.wanted'), '/wanted'),
                 const Spacer(),
               ],
               PopupMenuButton<String?>(

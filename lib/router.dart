@@ -10,6 +10,7 @@ import 'features/admin/admin_screens.dart';
 import 'features/auth/auth_screen.dart';
 import 'features/chat/chat_screens.dart';
 import 'features/home/home_screen.dart';
+import 'features/home/zone_home.dart';
 import 'features/info/info_screens.dart';
 import 'features/listing/listing_form.dart';
 import 'features/listing/listing_screen.dart';
@@ -60,6 +61,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (c, s, child) => AppShell(location: s.uri.path, child: child),
         routes: [
           GoRoute(path: '/', pageBuilder: (c, s) => _page(s, const HomeScreen())),
+          GoRoute(path: '/categories', pageBuilder: (c, s) => _page(s, const CategoriesScreen())),
+          GoRoute(path: '/used', pageBuilder: (c, s) => _page(s, const UsedScreen())),
           GoRoute(path: '/search', pageBuilder: (c, s) => _page(s, SearchScreen(params: SearchParams(
                 q: s.uri.queryParameters['q'],
                 category: s.uri.queryParameters['category'],
